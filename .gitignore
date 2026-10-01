@@ -1,4 +1,18 @@
-# Fabric Loom test client
+# Gradle
+.gradle/
+**/build/
+!**/src/**/build/
+.gradle-test-kit/
+.kotlin/
+
+# Gradle wrapper
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Compiled Java files
+*.class
+
+# Fabric Loom
 run/
 
 # IntelliJ IDEA
@@ -6,10 +20,26 @@ run/
 *.iml
 *.ipr
 *.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
 
 # VS Code
 .vscode/
 
-# OS / logs
-.DS_Store
+# Logs and crash reports
 *.log
+hs_err_pid*
+replay_pid*
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*~
