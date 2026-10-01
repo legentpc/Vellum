@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "vellumconfig",
+  "version": "${version}",
+  "name": "Vellum",
+  "description": "A lightweight configuration and GUI library for Fabric mods.",
+  "authors": [
+    "legentpc"
+  ],
+  "contact": {
+    "sources": "https://github.com/legentpc/Vellum"
+  },
+  "license": "LGPL-3.0-only",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.vellum.Vellum"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.1 <26.2",
+    "fabric-api": "*"
+  }
+}

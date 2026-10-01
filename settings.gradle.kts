@@ -15,5 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "vellum"
 
-include("core")
-include("fabric")
+include(":vellum")
