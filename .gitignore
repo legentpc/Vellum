@@ -1,0 +1,15 @@
+# Fabric Loom test client
+run/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# OS / logs
+.DS_Store
+*.log
