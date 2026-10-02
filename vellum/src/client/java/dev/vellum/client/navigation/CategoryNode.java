@@ -62,4 +62,16 @@ public final class CategoryNode {
     public boolean hasChildren() {
         return !children.isEmpty();
     }
+
+    public int depth() {
+        int depth = 0;
+        CategoryNode current = parent;
+
+        while (current != null && current.parent() != null) {
+            depth++;
+            current = current.parent();
+        }
+
+        return depth;
+    }
 }

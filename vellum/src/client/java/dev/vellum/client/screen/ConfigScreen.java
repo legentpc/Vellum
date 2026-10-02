@@ -9,6 +9,9 @@ public final class ConfigScreen extends Screen {
     private static final int PANEL_MARGIN = 24;
     private static final int HEADER_HEIGHT = 32;
     private static final int NAVIGATION_WIDTH = 180;
+    private static final int CATEGORY_ROW_HEIGHT = 20;
+    private static final int CATEGORY_TEXT_PADDING = 8;
+    private static final int CATEGORY_INDENT = 12;
 
     private final ConfigScreenState state;
 
@@ -116,6 +119,13 @@ public final class ConfigScreen extends Screen {
                 0xFFE6E8EB,
                 false
         );
+
+        int rowTop = navigationTop + 32;
+
+        for (var category : state.categoryTree().visibleNodes()) {
+            drawCategoryRow(graphics, category, rowTop);
+            rowTop += CATEGORY_ROW_HEIGHT;
+        }
     }
 
     private void drawContentPanel(
@@ -143,5 +153,51 @@ public final class ConfigScreen extends Screen {
                 0xFFFFFFFF,
                 false
         );
+    }
+
+    private void drawCategoryRow(
+            GuiGraphicsExtractor graphics,
+            dev.vellum.client.navigation.CategoryNode category,
+            int rowTop
+    ) {
+        boolean selected =
+                state.selectedCategory() == category;
+
+        if (selected) {
+            graphics.fill(
+                    navigationLeft + 4,
+                    rowTop - 3,
+                    navigationRight - 4,
+                    rowTop + CATEGORY_ROW_HEIGHT - 3,
+                    0xFF303640
+            );
+        }
+
+        int left = navigationLeft
+                + CATEGORY_TEXT_PADDING
+                + category.depth() * CATEGORY_INDENT;
+
+        String indicator = category.hasChildren()
+                ? category.expanded() ? "▾ " : "▸ "
+                : "  ";
+
+        graphics.text(
+                font,
+                Component.literal(indicator + category.title()),
+                left,
+                rowTop,
+                selected ? 0xFFFFFFFF : 0xFFD0D4DA,
+                false
+        );
+    }
+
+    private boolean isInsideNavigation(
+            double mouseX,
+            double mouseY
+    ) {
+        return mouseX >= navigationLeft
+                && mouseX < navigationRight
+                && mouseY >= navigationTop
+                && mouseY < navigationBottom;
     }
 }

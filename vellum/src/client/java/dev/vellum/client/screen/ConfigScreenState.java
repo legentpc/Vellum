@@ -15,6 +15,10 @@ public final class ConfigScreenState {
                 categoryTree,
                 "categoryTree"
         );
+
+        if (!categoryTree.visibleNodes().isEmpty()) {
+            selectedCategory = categoryTree.visibleNodes().get(0);
+        }
     }
 
     public CategoryTree categoryTree() {
