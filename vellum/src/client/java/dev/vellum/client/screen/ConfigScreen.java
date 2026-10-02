@@ -1,6 +1,5 @@
 package dev.vellum.client.screen;
 
-import dev.vellum.client.navigation.CategoryTree;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -189,6 +188,50 @@ public final class ConfigScreen extends Screen {
                 selected ? 0xFFFFFFFF : 0xFFD0D4DA,
                 false
         );
+    }
+
+    @Override
+    public boolean mouseClicked(
+            double mouseX,
+            double mouseY,
+            int button
+    ) {
+        if (button != 0) {
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
+        if (!isInsideNavigation(mouseX, mouseY)) {
+            return super.mouseClicked(mouseX, mouseY, button);
+        }
+
+        int rowTop = navigationTop + 32;
+
+        for (var category : state.categoryTree().visibleNodes()) {
+            int rowBottom = rowTop + CATEGORY_ROW_HEIGHT;
+
+            if (mouseY >= rowTop && mouseY < rowBottom) {
+                int categoryLeft = navigationLeft
+                        + CATEGORY_TEXT_PADDING
+                        + category.depth() * CATEGORY_INDENT;
+
+                boolean clickedIndicator =
+                        category.hasChildren()
+                                && mouseX >= categoryLeft
+                                && mouseX < categoryLeft + 16;
+
+                if (clickedIndicator) {
+                    state.toggle(category);
+                    return true;
+                }
+
+                state.select(category);
+                return true;
+            }
+
+            rowTop += CATEGORY_ROW_HEIGHT;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     private boolean isInsideNavigation(
