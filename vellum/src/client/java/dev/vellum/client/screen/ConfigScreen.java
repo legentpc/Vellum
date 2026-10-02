@@ -266,10 +266,33 @@ public final class ConfigScreen extends Screen {
             return super.mouseClicked(click, doubled);
         }
 
-        if (!isInsideNavigation(mouseX, mouseY)) {
-            return super.mouseClicked(click, doubled);
+        if (isInsideNavigation(mouseX, mouseY)) {
+            return handleNavigationClick(
+                    mouseX,
+                    mouseY,
+                    click,
+                    doubled
+            );
         }
 
+        if (isInsideContent(mouseX, mouseY)) {
+            return handleContentClick(
+                    mouseX,
+                    mouseY,
+                    click,
+                    doubled
+            );
+        }
+
+        return super.mouseClicked(click, doubled);
+    }
+
+    private boolean handleNavigationClick(
+            double mouseX,
+            double mouseY,
+            MouseButtonEvent click,
+            boolean doubled
+    ) {
         int rowTop = navigationTop + 32;
 
         for (var category : state.categoryTree().visibleNodes()) {
@@ -308,6 +331,63 @@ public final class ConfigScreen extends Screen {
                 && mouseX < navigationRight
                 && mouseY >= navigationTop
                 && mouseY < navigationBottom;
+    }
+
+    private boolean isInsideContent(
+            double mouseX,
+            double mouseY
+    ) {
+        return mouseX >= contentLeft
+                && mouseX < contentRight
+                && mouseY >= contentTop
+                && mouseY < contentBottom;
+    }
+
+    private boolean handleContentClick(
+            double mouseX,
+            double mouseY,
+            MouseButtonEvent click,
+            boolean doubled
+    ) {
+        if (state.selectedCategory() == null) {
+            return super.mouseClicked(click, doubled);
+        }
+
+        int rowTop = contentTop + 42;
+
+        for (var option : state.selectedCategory().options()) {
+            int rowBottom = rowTop + OPTION_ROW_HEIGHT;
+
+            if (mouseY >= rowTop && mouseY < rowBottom) {
+                if (isBooleanOption(option)
+                        && isInsideBooleanControl(mouseX, rowTop)) {
+                    toggleBoolean(option);
+                    return true;
+                }
+
+                return true;
+            }
+
+            rowTop += OPTION_ROW_HEIGHT;
+        }
+
+        return super.mouseClicked(click, doubled);
+    }
+
+    private boolean isInsideBooleanControl(
+            double mouseX,
+            int rowTop
+    ) {
+        int left = contentRight
+                - OPTION_CONTROL_WIDTH
+                - 18;
+
+        int top = rowTop + 3;
+
+        return mouseX >= left
+                && mouseX < left + OPTION_CONTROL_WIDTH
+                && top >= contentTop
+                && top + OPTION_CONTROL_HEIGHT <= contentBottom;
     }
 
     private boolean isBooleanOption(
