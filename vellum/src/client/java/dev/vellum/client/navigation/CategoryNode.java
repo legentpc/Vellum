@@ -1,5 +1,7 @@
 package dev.vellum.client.navigation;
 
+import dev.vellum.config.ConfigOptionHandle;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +12,7 @@ public final class CategoryNode {
     private final String title;
     private final CategoryNode parent;
     private final List<CategoryNode> children = new ArrayList<>();
+    private final List<ConfigOptionHandle<?>> options = new ArrayList<>();
 
     private boolean expanded;
 
@@ -61,6 +64,14 @@ public final class CategoryNode {
 
     public boolean hasChildren() {
         return !children.isEmpty();
+    }
+
+    public List<ConfigOptionHandle<?>> options() {
+        return Collections.unmodifiableList(options);
+    }
+
+    public void addOption(ConfigOptionHandle<?> option) {
+        options.add(Objects.requireNonNull(option, "option"));
     }
 
     public int depth() {

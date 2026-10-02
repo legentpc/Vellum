@@ -153,6 +153,58 @@ public final class ConfigScreen extends Screen {
                 0xFFFFFFFF,
                 false
         );
+
+        if (state.selectedCategory() == null) {
+            return;
+        }
+
+        int optionTop = contentTop + 42;
+
+        for (var option : state.selectedCategory().options()) {
+            drawOptionRow(
+                    graphics,
+                    option.name(),
+                    option.description(),
+                    optionTop
+            );
+
+            optionTop += 38;
+        }
+    }
+
+    private void drawOptionRow(
+            GuiGraphicsExtractor graphics,
+            String name,
+            String description,
+            int rowTop
+    ) {
+        graphics.fill(
+                contentLeft + 8,
+                rowTop - 4,
+                contentRight - 8,
+                rowTop + 30,
+                0xFF22262D
+        );
+
+        graphics.text(
+                font,
+                Component.literal(name),
+                contentLeft + 18,
+                rowTop + 2,
+                0xFFFFFFFF,
+                false
+        );
+
+        if (!description.isBlank()) {
+            graphics.text(
+                    font,
+                    Component.literal(description),
+                    contentLeft + 18,
+                    rowTop + 16,
+                    0xFFB8BEC8,
+                    false
+            );
+        }
     }
 
     private void drawCategoryRow(

@@ -1,5 +1,7 @@
 package dev.vellum.client.navigation;
 
+import dev.vellum.config.ConfigOptionHandle;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +43,20 @@ public final class CategoryTree {
         }
 
         return current;
+    }
+
+    public CategoryNode addOption(
+            String categoryPath,
+            String categoryTitle,
+            ConfigOptionHandle<?> option
+    ) {
+        CategoryNode category = addPath(
+                categoryPath,
+                categoryTitle
+        );
+
+        category.addOption(option);
+        return category;
     }
 
     public List<CategoryNode> visibleNodes() {
