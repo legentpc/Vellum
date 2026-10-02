@@ -1,5 +1,7 @@
 package dev.vellum.client.screen;
 
+import dev.vellum.config.ConfigOptionHandle;
+
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -12,6 +14,9 @@ public final class ConfigScreen extends Screen {
     private static final int CATEGORY_ROW_HEIGHT = 20;
     private static final int CATEGORY_TEXT_PADDING = 8;
     private static final int CATEGORY_INDENT = 12;
+    private static final int OPTION_ROW_HEIGHT = 38;
+    private static final int OPTION_CONTROL_WIDTH = 52;
+    private static final int OPTION_CONTROL_HEIGHT = 20;
 
     private final ConfigScreenState state;
 
@@ -163,46 +168,52 @@ public final class ConfigScreen extends Screen {
         for (var option : state.selectedCategory().options()) {
             drawOptionRow(
                     graphics,
-                    option.name(),
-                    option.description(),
+                    option,
                     optionTop
             );
 
-            optionTop += 38;
+            optionTop += OPTION_ROW_HEIGHT;
         }
     }
 
     private void drawOptionRow(
             GuiGraphicsExtractor graphics,
-            String name,
-            String description,
+            ConfigOptionHandle<?> option,
             int rowTop
     ) {
         graphics.fill(
                 contentLeft + 8,
                 rowTop - 4,
                 contentRight - 8,
-                rowTop + 30,
+                rowTop + OPTION_ROW_HEIGHT - 4,
                 0xFF22262D
         );
 
         graphics.text(
                 font,
-                Component.literal(name),
+                Component.literal(option.name()),
                 contentLeft + 18,
                 rowTop + 2,
                 0xFFFFFFFF,
                 false
         );
 
-        if (!description.isBlank()) {
+        if (!option.description().isBlank()) {
             graphics.text(
                     font,
-                    Component.literal(description),
+                    Component.literal(option.description()),
                     contentLeft + 18,
                     rowTop + 16,
                     0xFFB8BEC8,
                     false
+            );
+        }
+
+        if (isBooleanOption(option)) {
+            drawBooleanControl(
+                    graphics,
+                    option,
+                    rowTop
             );
         }
     }
@@ -297,5 +308,65 @@ public final class ConfigScreen extends Screen {
                 && mouseX < navigationRight
                 && mouseY >= navigationTop
                 && mouseY < navigationBottom;
+    }
+
+    private boolean isBooleanOption(
+            ConfigOptionHandle<?> option
+    ) {
+        Class<?> type = option.valueType();
+
+        return type == boolean.class
+                || type == Boolean.class;
+    }
+
+    private void drawBooleanControl(
+            GuiGraphicsExtractor graphics,
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        boolean enabled = readBoolean(option);
+
+        int left = contentRight
+                - OPTION_CONTROL_WIDTH
+                - 18;
+
+        int top = rowTop + 3;
+
+        graphics.fill(
+                left,
+                top,
+                left + OPTION_CONTROL_WIDTH,
+                top + OPTION_CONTROL_HEIGHT,
+                enabled
+                        ? 0xFF3E7A52
+                        : 0xFF454A52
+        );
+
+        graphics.text(
+                font,
+                Component.literal(enabled ? "ON" : "OFF"),
+                left + 13,
+                top + 6,
+                0xFFFFFFFF,
+                false
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean readBoolean(
+            ConfigOptionHandle<?> option
+    ) {
+        return Boolean.TRUE.equals(option.get());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void toggleBoolean(
+            ConfigOptionHandle<?> option
+    ) {
+        ConfigOptionHandle<Boolean> booleanOption =
+                (ConfigOptionHandle<Boolean>) option;
+
+        booleanOption.set(!readBoolean(option));
+        state.markDirty();
     }
 }
