@@ -2,6 +2,7 @@ package dev.vellum.client.screen;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 public final class ConfigScreen extends Screen {
@@ -192,16 +193,18 @@ public final class ConfigScreen extends Screen {
 
     @Override
     public boolean mouseClicked(
-            double mouseX,
-            double mouseY,
-            int button
+            MouseButtonEvent click,
+            boolean doubled
     ) {
-        if (button != 0) {
-            return super.mouseClicked(mouseX, mouseY, button);
+        double mouseX = click.x();
+        double mouseY = click.y();
+
+        if (click.button() != 0) {
+            return super.mouseClicked(click, doubled);
         }
 
         if (!isInsideNavigation(mouseX, mouseY)) {
-            return super.mouseClicked(mouseX, mouseY, button);
+            return super.mouseClicked(click, doubled);
         }
 
         int rowTop = navigationTop + 32;
@@ -231,7 +234,7 @@ public final class ConfigScreen extends Screen {
             rowTop += CATEGORY_ROW_HEIGHT;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(click, doubled);
     }
 
     private boolean isInsideNavigation(
