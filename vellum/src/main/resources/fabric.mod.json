@@ -15,6 +15,9 @@
   "entrypoints": {
     "main": [
       "dev.vellum.Vellum"
+    ],
+    "client": [
+      "dev.vellum.client.VellumClient"
     ]
   },
   "depends": {
