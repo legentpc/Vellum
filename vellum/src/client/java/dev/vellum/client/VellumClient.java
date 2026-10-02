@@ -3,6 +3,7 @@ package dev.vellum.client;
 import dev.vellum.client.navigation.CategoryTree;
 import dev.vellum.client.screen.ConfigScreen;
 import dev.vellum.client.screen.ConfigScreenState;
+import dev.vellum.config.ConfigManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
@@ -17,15 +18,14 @@ public final class VellumClient implements ClientModInitializer {
         LOGGER.info("Vellum client initialized.");
     }
 
-    public static void openConfigScreen() {
-        CategoryTree tree = new CategoryTree();
+    public static void openConfigScreen(
+            ConfigManager<?> manager
+    ) {
+        CategoryTree tree =
+                CategoryTree.fromConfigManager(manager);
 
-        tree.addPath("general", "General");
-        tree.addPath("graphics", "Graphics");
-        tree.addPath("graphics.shaders", "Shaders");
-        tree.addPath("performance", "Performance");
-
-        ConfigScreenState state = new ConfigScreenState(tree);
+        ConfigScreenState state =
+                new ConfigScreenState(tree);
 
         Minecraft.getInstance().setScreen(
                 new ConfigScreen(state)

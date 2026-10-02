@@ -1,5 +1,6 @@
 package dev.vellum.client.navigation;
 
+import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
 import java.util.ArrayList;
@@ -13,6 +14,45 @@ public final class CategoryTree {
     public CategoryTree() {
         this.root = new CategoryNode("root", "Root", null);
         this.root.setExpanded(true);
+    }
+
+    public static CategoryTree fromConfigManager(
+            ConfigManager<?> manager
+    ) {
+        Objects.requireNonNull(manager, "manager");
+
+        CategoryTree tree = new CategoryTree();
+
+        for (var entry : manager.optionsByCategory().entrySet()) {
+            String categoryPath = entry.getKey();
+            String categoryTitle = titleFromPath(categoryPath);
+
+            CategoryNode category = tree.addPath(
+                    categoryPath,
+                    categoryTitle
+            );
+
+            for (var option : entry.getValue()) {
+                category.addOption(option);
+            }
+        }
+
+        return tree;
+    }
+
+    private static String titleFromPath(String path) {
+        int separator = path.lastIndexOf('.');
+
+        String title = separator >= 0
+                ? path.substring(separator + 1)
+                : path;
+
+        if (title.isEmpty()) {
+            return path;
+        }
+
+        return Character.toUpperCase(title.charAt(0))
+                + title.substring(1);
     }
 
     public CategoryNode root() {
