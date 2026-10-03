@@ -1,17 +1,19 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.widget.StringListOption;
+import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 import java.lang.reflect.ParameterizedType;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Objects;
 
 public final class ConfigScreen extends Screen {
     private static final int PANEL_MARGIN = 24;
@@ -25,8 +27,11 @@ public final class ConfigScreen extends Screen {
     private static final int LIST_ROW_TOP_OFFSET = 42;
     private static final int OPTION_CONTROL_WIDTH = 52;
     private static final int OPTION_CONTROL_HEIGHT = 20;
+    private static final int SAVE_BUTTON_WIDTH = 64;
+    private static final int SAVE_BUTTON_HEIGHT = 20;
 
     private final ConfigScreenState state;
+    private final ConfigManager<?> configManager;
 
     private int navigationLeft;
     private int navigationTop;
@@ -38,11 +43,16 @@ public final class ConfigScreen extends Screen {
     private int contentRight;
     private int contentBottom;
 
-    private EditBox listInputBox;
-
-    public ConfigScreen(ConfigScreenState state) {
+    public ConfigScreen(
+            ConfigScreenState state,
+            ConfigManager<?> configManager
+    ) {
         super(Component.literal("Vellum Configuration"));
-        this.state = state;
+        this.state = Objects.requireNonNull(state, "state");
+        this.configManager = Objects.requireNonNull(
+                configManager,
+                "configManager"
+        );
     }
 
     public ConfigScreenState state() {
@@ -52,18 +62,6 @@ public final class ConfigScreen extends Screen {
     @Override
     protected void init() {
         updateLayout();
-
-        listInputBox = new EditBox(
-                font,
-                contentLeft + 24,
-                contentTop + 80,
-                220,
-                20,
-                Component.literal("New list item")
-        );
-
-        listInputBox.setVisible(false);
-        addRenderableWidget(listInputBox);
     }
 
     @Override
@@ -182,6 +180,7 @@ public final class ConfigScreen extends Screen {
         );
 
         if (state.selectedCategory() == null) {
+            drawSaveButton(graphics);
             return;
         }
 
@@ -196,22 +195,29 @@ public final class ConfigScreen extends Screen {
 
             optionTop += OPTION_ROW_HEIGHT;
         }
+
+        drawSaveButton(graphics);
     }
 
-    if (state.listInputOpen()) {
+    private void drawSaveButton(
+            GuiGraphicsExtractor graphics
+    ) {
+        int left = contentRight - SAVE_BUTTON_WIDTH - 12;
+        int top = contentBottom - SAVE_BUTTON_HEIGHT - 12;
+
         graphics.fill(
-                contentLeft + 16,
-                contentTop + 62,
-                contentLeft + 270,
-                contentTop + 112,
-                0xFF30343B
+                left,
+                top,
+                left + SAVE_BUTTON_WIDTH,
+                top + SAVE_BUTTON_HEIGHT,
+                state.dirty() ? 0xFF3E7A52 : 0xFF454A52
         );
 
         graphics.text(
                 font,
-                Component.literal("Add list item"),
-                contentLeft + 24,
-                contentTop + 68,
+                Component.literal("Save"),
+                left + 16,
+                top + 6,
                 0xFFFFFFFF,
                 false
         );
@@ -396,6 +402,11 @@ public final class ConfigScreen extends Screen {
             MouseButtonEvent click,
             boolean doubled
     ) {
+        if (isInsideSaveButton(mouseX, mouseY)) {
+            saveConfiguration();
+            return true;
+        }
+
         if (state.selectedCategory() == null) {
             return super.mouseClicked(click, doubled);
         }
@@ -448,6 +459,35 @@ public final class ConfigScreen extends Screen {
         return super.mouseClicked(click, doubled);
     }
 
+    private boolean isInsideSaveButton(
+            double mouseX,
+            double mouseY
+    ) {
+        int left = contentRight - SAVE_BUTTON_WIDTH - 12;
+        int top = contentBottom - SAVE_BUTTON_HEIGHT - 12;
+
+        return mouseX >= left
+                && mouseX < left + SAVE_BUTTON_WIDTH
+                && mouseY >= top
+                && mouseY < top + SAVE_BUTTON_HEIGHT;
+    }
+
+    private void saveConfiguration() {
+        if (!state.dirty()) {
+            return;
+        }
+
+        try {
+            configManager.save();
+            state.markClean();
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Unable to save Vellum configuration",
+                    exception
+            );
+        }
+    }
+
     private boolean isInsideAddButton(
             double mouseX,
             int rowTop
@@ -478,68 +518,11 @@ public final class ConfigScreen extends Screen {
     private void addListValue(
             ConfigOptionHandle<?> option
     ) {
-        state.openListInput(option);
-
-        listInputBox.setValue("");
-        listInputBox.setVisible(true);
-        setInitialFocus(listInputBox);
-    }
-
-    private void confirmListInput() {
-        String value = listInputBox.getValue().trim();
-
-        if (value.isEmpty()) {
-            return;
-        }
-
-        ConfigOptionHandle<?> option =
-                state.listInputOption();
-
-        if (option == null) {
-            return;
-        }
-
         StringListOption list =
                 new StringListOption(option);
 
-        list.add(value);
+        list.add("New Entry");
         state.markDirty();
-
-        state.closeListInput();
-        listInputBox.setValue("");
-        listInputBox.setVisible(false);
-    }
-
-    private void cancelListInput() {
-        state.closeListInput();
-
-        listInputBox.setValue("");
-        listInputBox.setVisible(false);
-    }
-
-    @Override
-    public boolean keyPressed(
-            int keyCode,
-            int scanCode,
-            int modifiers
-    ) {
-        if (state.listInputOpen()) {
-            if (keyCode == 257) {
-                confirmListInput();
-                return true;
-            }
-
-            if (keyCode == 256) {
-                cancelListInput();
-                return true;
-            }
-        }
-
-        return super.keyPressed(
-                keyCode,
-                scanCode,
-                modifiers
-        );
     }
 
     private void removeListValue(

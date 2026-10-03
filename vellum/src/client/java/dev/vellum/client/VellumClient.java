@@ -28,7 +28,7 @@ public final class VellumClient implements ClientModInitializer {
                 new ConfigScreenState(tree);
 
         Minecraft.getInstance().setScreen(
-                new ConfigScreen(state)
+                new ConfigScreen(state, manager)
         );
     }
 }
