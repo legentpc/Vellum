@@ -290,6 +290,51 @@ public final class ConfigScreen extends Screen {
         }
 
         drawSaveButton(graphics);
+
+        drawCloseWarning(graphics);
+    }
+
+    private boolean handleCloseWarningClick(
+            double mouseX,
+            double mouseY
+    ) {
+        if (!state.closeWarningOpen()) {
+            return false;
+        }
+
+        int left = width / 2 - 140;
+        int top = height / 2 - 55;
+
+        if (mouseX < left
+                || mouseX >= left + 280
+                || mouseY < top
+                || mouseY >= top + 110) {
+            return true;
+        }
+
+        if (mouseY >= top + 32
+                && mouseY < top + 56) {
+            saveConfiguration();
+            state.closeCloseWarning();
+            super.onClose();
+            return true;
+        }
+
+        if (mouseY >= top + 56
+                && mouseY < top + 78) {
+            state.markClean();
+            state.closeCloseWarning();
+            super.onClose();
+            return true;
+        }
+
+        if (mouseY >= top + 78
+                && mouseY < top + 104) {
+            state.closeCloseWarning();
+            return true;
+        }
+
+        return true;
     }
 
     private void drawSaveButton(
@@ -494,6 +539,79 @@ public final class ConfigScreen extends Screen {
         return super.mouseClicked(click, doubled);
     }
 
+    @Override
+    public void onClose() {
+        if (state.dirty()) {
+            state.openCloseWarning();
+            return;
+        }
+
+        super.onClose();
+    }
+
+    private void drawCloseWarning(
+            GuiGraphicsExtractor graphics
+    ) {
+        if (!state.closeWarningOpen()) {
+            return;
+        }
+
+        int left = width / 2 - 140;
+        int top = height / 2 - 55;
+
+        graphics.fill(
+                0,
+                0,
+                width,
+                height,
+                0x99000000
+        );
+
+        graphics.fill(
+                left,
+                top,
+                left + 280,
+                top + 110,
+                0xFF30343B
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Unsaved changes"),
+                left + 20,
+                top + 16,
+                0xFFFFFFFF,
+                false
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Save and close"),
+                left + 20,
+                top + 42,
+                0xFFFFFFFF,
+                false
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Discard"),
+                left + 20,
+                top + 62,
+                0xFFFFFFFF,
+                false
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Cancel"),
+                left + 20,
+                top + 82,
+                0xFFFFFFFF,
+                false
+        );
+    }
+
     private boolean isInsideNavigation(
             double mouseX,
             double mouseY
@@ -520,6 +638,10 @@ public final class ConfigScreen extends Screen {
             MouseButtonEvent click,
             boolean doubled
     ) {
+        if (handleCloseWarningClick(mouseX, mouseY)) {
+            return true;
+        }
+
         if (isInsideSaveButton(mouseX, mouseY)) {
             saveConfiguration();
             return true;

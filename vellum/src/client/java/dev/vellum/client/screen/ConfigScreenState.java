@@ -19,6 +19,7 @@ public final class ConfigScreenState {
     private ConfigOptionHandle<?> draggingListOption;
     private int draggingListIndex = -1;
     private ConfigOptionHandle<?> editingStringOption;
+    private boolean closeWarningOpen;
 
     public ConfigScreenState(CategoryTree categoryTree) {
         this.categoryTree = Objects.requireNonNull(
@@ -137,5 +138,17 @@ public final class ConfigScreenState {
 
     public void markClean() {
         dirty = false;
+    }
+
+    public boolean closeWarningOpen() {
+        return closeWarningOpen;
+    }
+
+    public void openCloseWarning() {
+        closeWarningOpen = true;
+    }
+
+    public void closeCloseWarning() {
+        closeWarningOpen = false;
     }
 }
