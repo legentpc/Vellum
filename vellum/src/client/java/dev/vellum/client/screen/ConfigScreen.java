@@ -4,7 +4,6 @@ import dev.vellum.client.widget.StringListOption;
 import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -63,18 +62,6 @@ public final class ConfigScreen extends Screen {
     @Override
     protected void init() {
         updateLayout();
-
-        listInputBox = new EditBox(
-                font,
-                contentLeft + 24,
-                contentTop + 80,
-                220,
-                20,
-                Component.literal("New list item")
-        );
-
-        listInputBox.setVisible(false);
-        addRenderableWidget(listInputBox);
     }
 
     @Override
@@ -531,68 +518,11 @@ public final class ConfigScreen extends Screen {
     private void addListValue(
             ConfigOptionHandle<?> option
     ) {
-        state.openListInput(option);
-
-        listInputBox.setValue("");
-        listInputBox.setVisible(true);
-        setInitialFocus(listInputBox);
-    }
-
-    private void confirmListInput() {
-        String value = listInputBox.getValue().trim();
-
-        if (value.isEmpty()) {
-            return;
-        }
-
-        ConfigOptionHandle<?> option =
-                state.listInputOption();
-
-        if (option == null) {
-            return;
-        }
-
         StringListOption list =
                 new StringListOption(option);
 
-        list.add(value);
+        list.add("New Entry");
         state.markDirty();
-
-        state.closeListInput();
-        listInputBox.setValue("");
-        listInputBox.setVisible(false);
-    }
-
-    private void cancelListInput() {
-        state.closeListInput();
-
-        listInputBox.setValue("");
-        listInputBox.setVisible(false);
-    }
-
-    @Override
-    public boolean keyPressed(
-            int keyCode,
-            int scanCode,
-            int modifiers
-    ) {
-        if (state.listInputOpen()) {
-            if (keyCode == 257) {
-                confirmListInput();
-                return true;
-            }
-
-            if (keyCode == 256) {
-                cancelListInput();
-                return true;
-            }
-        }
-
-        return super.keyPressed(
-                keyCode,
-                scanCode,
-                modifiers
-        );
     }
 
     private void removeListValue(
