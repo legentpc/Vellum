@@ -110,6 +110,29 @@ public final class StringListOption {
         }
     }
 
+    public void move(
+            int fromIndex,
+            int toIndex
+    ) {
+        List<String> updated =
+                new ArrayList<>(values());
+
+        if (fromIndex < 0
+                || fromIndex >= updated.size()
+                || toIndex < 0
+                || toIndex >= updated.size()
+                || fromIndex == toIndex) {
+            return;
+        }
+
+        String moved =
+                updated.remove(fromIndex);
+
+        updated.add(toIndex, moved);
+        write(updated);
+        selectedIndex = toIndex;
+    }
+
     private List<?> rawValues() {
         Object value = option.get();
 
