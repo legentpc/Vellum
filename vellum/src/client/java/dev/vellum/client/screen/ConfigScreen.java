@@ -9,6 +9,7 @@ import dev.vellum.config.ConfigOptionHandle;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
@@ -596,10 +597,22 @@ public final class ConfigScreen extends Screen {
 
     @Override
     public boolean keyPressed(
-            int keyCode,
-            int scanCode,
-            int modifiers
+            KeyEvent event
     ) {
+        int keyCode = event.key();
+
+        if (state.editingStringOption() != null) {
+            if (keyCode == 257) {
+                confirmStringEdit();
+                return true;
+            }
+
+            if (keyCode == 256) {
+                cancelStringEdit();
+                return true;
+            }
+        }
+
         if (state.listInputOpen()) {
             if (keyCode == 257) {
                 confirmListInput();
@@ -612,11 +625,7 @@ public final class ConfigScreen extends Screen {
             }
         }
 
-        return super.keyPressed(
-                keyCode,
-                scanCode,
-                modifiers
-        );
+        return super.keyPressed(event);
     }
 
     private void removeListValue(
@@ -725,12 +734,45 @@ public final class ConfigScreen extends Screen {
                 && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
     }
 
-    private void beginStringEdit(ConfigOptionHandle<?> option, int rowTop) {
-        StringOption string = new StringOption(option);
+    private void beginStringEdit(
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        StringOption string =
+                new StringOption(option);
+
+        state.beginStringEdit(option);
+
         listInputBox.setValue(string.value());
         listInputBox.setY(rowTop + 3);
         listInputBox.setVisible(true);
         setInitialFocus(listInputBox);
+    }
+
+    private void confirmStringEdit() {
+        ConfigOptionHandle<?> option =
+                state.editingStringOption();
+
+        if (option == null) {
+            return;
+        }
+
+        StringOption string =
+                new StringOption(option);
+
+        string.setValue(listInputBox.getValue());
+        state.markDirty();
+        state.endStringEdit();
+
+        listInputBox.setValue("");
+        listInputBox.setVisible(false);
+    }
+
+    private void cancelStringEdit() {
+        state.endStringEdit();
+
+        listInputBox.setValue("");
+        listInputBox.setVisible(false);
     }
 
     private boolean isBooleanOption(

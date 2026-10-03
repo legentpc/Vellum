@@ -18,6 +18,7 @@ public final class ConfigScreenState {
     private boolean draggingListItem;
     private ConfigOptionHandle<?> draggingListOption;
     private int draggingListIndex = -1;
+    private ConfigOptionHandle<?> editingStringOption;
 
     public ConfigScreenState(CategoryTree categoryTree) {
         this.categoryTree = Objects.requireNonNull(
@@ -90,6 +91,23 @@ public final class ConfigScreenState {
 
     public String listInputText() {
         return listInputText;
+    }
+
+    public ConfigOptionHandle<?> editingStringOption() {
+        return editingStringOption;
+    }
+
+    public void beginStringEdit(
+            ConfigOptionHandle<?> option
+    ) {
+        editingStringOption = Objects.requireNonNull(
+                option,
+                "option"
+        );
+    }
+
+    public void endStringEdit() {
+        editingStringOption = null;
     }
 
     public void openListInput(
