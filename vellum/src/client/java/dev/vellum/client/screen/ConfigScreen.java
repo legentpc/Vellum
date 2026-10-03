@@ -172,6 +172,80 @@ public final class ConfigScreen extends Screen {
         }
     }
 
+    private void drawOptionMenu(
+            GuiGraphicsExtractor graphics
+    ) {
+        if (optionMenu == null
+                || !optionMenu.open()) {
+            return;
+        }
+
+        int left = contentRight - 150;
+        int top = contentTop + 72;
+
+        graphics.fill(
+                left,
+                top,
+                left + 130,
+                top + 48,
+                0xFF30343B
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Reset"),
+                left + 10,
+                top + 8,
+                0xFFFFFFFF,
+                false
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Close"),
+                left + 10,
+                top + 28,
+                0xFFFFFFFF,
+                false
+        );
+    }
+
+    private boolean handleOptionMenuClick(
+            double mouseX,
+            double mouseY
+    ) {
+        if (optionMenu == null
+                || !optionMenu.open()) {
+            return false;
+        }
+
+        int left = contentRight - 150;
+        int top = contentTop + 72;
+
+        if (mouseX < left
+                || mouseX >= left + 130
+                || mouseY < top
+                || mouseY >= top + 48) {
+            optionMenu.hide();
+            return true;
+        }
+
+        if (mouseY < top + 24) {
+            optionMenu.perform(
+                    OptionMenu.Action.RESET
+            );
+
+            state.markDirty();
+            return true;
+        }
+
+        optionMenu.perform(
+                OptionMenu.Action.CLOSE
+        );
+
+        return true;
+    }
+
     private void drawContentPanel(
             GuiGraphicsExtractor graphics
     ) {
@@ -448,6 +522,10 @@ public final class ConfigScreen extends Screen {
     ) {
         if (isInsideSaveButton(mouseX, mouseY)) {
             saveConfiguration();
+            return true;
+        }
+
+        if (handleOptionMenuClick(mouseX, mouseY)) {
             return true;
         }
 

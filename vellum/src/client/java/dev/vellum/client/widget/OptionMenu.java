@@ -40,4 +40,21 @@ public final class OptionMenu {
     public void reset() {
         hide();
     }
+
+    public enum Action {
+        RESET,
+        CLOSE
+    }
+
+    public void perform(Action action) {
+        Objects.requireNonNull(
+                action,
+                "action"
+        );
+
+        switch (action) {
+            case RESET -> reset();
+            case CLOSE -> hide();
+        }
+    }
 }
