@@ -38,8 +38,6 @@ public final class OptionMenu {
     }
 
     public void reset() {
-        // Reset action ko baad mein default-value
-        // metadata ke saath connect kiya jayega.
         hide();
     }
 }
