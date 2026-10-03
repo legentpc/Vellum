@@ -2,6 +2,8 @@ package dev.vellum.client.widget;
 
 import dev.vellum.config.ConfigOptionHandle;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,11 +16,29 @@ public final class StringListOption {
     public StringListOption(ConfigOptionHandle<?> option) {
         this.option = Objects.requireNonNull(option, "option");
 
-        if (!List.class.isAssignableFrom(option.valueType())) {
+        if (!isStringList(option.genericType())) {
             throw new IllegalArgumentException(
-                    "Option must contain a List value: " + option.name()
+                    "Option must be declared as List<String>: "
+                            + option.name()
             );
         }
+    }
+
+    private static boolean isStringList(Type type) {
+        if (!(type instanceof ParameterizedType parameterizedType)) {
+            return false;
+        }
+
+        if (!(parameterizedType.getRawType() instanceof Class<?> rawType)
+                || !List.class.isAssignableFrom(rawType)) {
+            return false;
+        }
+
+        Type[] arguments =
+                parameterizedType.getActualTypeArguments();
+
+        return arguments.length == 1
+                && arguments[0] == String.class;
     }
 
     public String name() {
