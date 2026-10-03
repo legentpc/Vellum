@@ -19,7 +19,9 @@ public final class ConfigScreen extends Screen {
     private static final int CATEGORY_ROW_HEIGHT = 20;
     private static final int CATEGORY_TEXT_PADDING = 8;
     private static final int CATEGORY_INDENT = 12;
-    private static final int OPTION_ROW_HEIGHT = 38;
+    private static final int OPTION_ROW_HEIGHT = 150;
+    private static final int LIST_ROW_HEIGHT = 18;
+    private static final int LIST_ROW_TOP_OFFSET = 42;
     private static final int OPTION_CONTROL_WIDTH = 52;
     private static final int OPTION_CONTROL_HEIGHT = 20;
 
@@ -376,6 +378,21 @@ public final class ConfigScreen extends Screen {
                     return true;
                 }
 
+                if (isStringListOption(option)) {
+                    StringListOption list = new StringListOption(option);
+                    int listTop = rowTop + LIST_ROW_TOP_OFFSET;
+                    int index = (int) ((mouseY - listTop) / LIST_ROW_HEIGHT);
+
+                    if (index >= 0
+                            && index < list.values().size()
+                            && mouseX >= contentLeft + 18
+                            && mouseX < contentRight - 150) {
+                        list.select(index);
+                        state.selectListItem(option, index);
+                        return true;
+                    }
+                }
+
                 if (isStringListOption(option)
                         && isInsideAddButton(mouseX, rowTop)) {
                     addListValue(option);
@@ -437,10 +454,15 @@ public final class ConfigScreen extends Screen {
     private void removeListValue(
             ConfigOptionHandle<?> option
     ) {
-        StringListOption list =
-                new StringListOption(option);
+        if (state.selectedListOption() != option) {
+            return;
+        }
 
+        StringListOption list = new StringListOption(option);
+        list.select(state.selectedListIndex());
         list.removeSelected();
+
+        state.clearListSelection();
         state.markDirty();
     }
 
@@ -526,43 +548,54 @@ public final class ConfigScreen extends Screen {
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
+        StringListOption list = new StringListOption(option);
+        int listTop = rowTop + LIST_ROW_TOP_OFFSET;
+        int index = 0;
+
+        for (String value : list.values()) {
+            int itemTop = listTop + index * LIST_ROW_HEIGHT;
+            boolean selected = state.selectedListOption() == option
+                    && state.selectedListIndex() == index;
+
+            graphics.fill(
+                    contentLeft + 18,
+                    itemTop,
+                    contentRight - 150,
+                    itemTop + LIST_ROW_HEIGHT - 2,
+                    selected ? 0xFF3E596F : 0xFF2A2E35
+            );
+
+            graphics.text(
+                    font,
+                    Component.literal(value),
+                    contentLeft + 26,
+                    itemTop + 4,
+                    0xFFFFFFFF,
+                    false
+            );
+            index++;
+        }
+
+        drawListButtons(graphics, rowTop);
+    }
+
+    private void drawListButtons(
+            GuiGraphicsExtractor graphics,
+            int rowTop
+    ) {
         int buttonTop = rowTop + 3;
         int removeLeft = contentRight - 72;
         int addLeft = removeLeft - 60;
 
-        graphics.fill(
-                addLeft,
-                buttonTop,
-                addLeft + 52,
-                buttonTop + OPTION_CONTROL_HEIGHT,
-                0xFF3E7A52
-        );
+        graphics.fill(addLeft, buttonTop, addLeft + 52,
+                buttonTop + OPTION_CONTROL_HEIGHT, 0xFF3E7A52);
+        graphics.text(font, Component.literal("Add"), addLeft + 13,
+                buttonTop + 6, 0xFFFFFFFF, false);
 
-        graphics.text(
-                font,
-                Component.literal("Add"),
-                addLeft + 13,
-                buttonTop + 6,
-                0xFFFFFFFF,
-                false
-        );
-
-        graphics.fill(
-                removeLeft,
-                buttonTop,
-                removeLeft + 64,
-                buttonTop + OPTION_CONTROL_HEIGHT,
-                0xFF8A4141
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Remove"),
-                removeLeft + 7,
-                buttonTop + 6,
-                0xFFFFFFFF,
-                false
-        );
+        graphics.fill(removeLeft, buttonTop, removeLeft + 64,
+                buttonTop + OPTION_CONTROL_HEIGHT, 0xFF8A4141);
+        graphics.text(font, Component.literal("Remove"), removeLeft + 7,
+                buttonTop + 6, 0xFFFFFFFF, false);
     }
 
     @SuppressWarnings("unchecked")
