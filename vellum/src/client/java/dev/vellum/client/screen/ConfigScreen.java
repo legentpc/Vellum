@@ -1,11 +1,14 @@
 package dev.vellum.client.screen;
 
+import dev.vellum.client.widget.StringListOption;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 public final class ConfigScreen extends Screen {
     private static final int PANEL_MARGIN = 24;
@@ -215,6 +218,12 @@ public final class ConfigScreen extends Screen {
                     option,
                     rowTop
             );
+        } else if (isStringListOption(option)) {
+            drawListControls(
+                    graphics,
+                    option,
+                    rowTop
+            );
         }
     }
 
@@ -359,9 +368,15 @@ public final class ConfigScreen extends Screen {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouseY >= rowTop && mouseY < rowBottom) {
-                if (isBooleanOption(option)
-                        && isInsideBooleanControl(mouseX, rowTop)) {
-                    toggleBoolean(option);
+                if (isStringListOption(option)
+                        && isInsideAddButton(mouseX, rowTop)) {
+                    addListValue(option);
+                    return true;
+                }
+
+                if (isStringListOption(option)
+                        && isInsideRemoveButton(mouseX, rowTop)) {
+                    removeListValue(option);
                     return true;
                 }
 
@@ -372,6 +387,53 @@ public final class ConfigScreen extends Screen {
         }
 
         return super.mouseClicked(click, doubled);
+    }
+
+    private boolean isInsideAddButton(
+            double mouseX,
+            int rowTop
+    ) {
+        int removeLeft = contentRight - 72;
+        int addLeft = removeLeft - 60;
+        int buttonTop = rowTop + 3;
+
+        return mouseX >= addLeft
+                && mouseX < addLeft + 52
+                && buttonTop <= rowTop + OPTION_ROW_HEIGHT
+                && rowTop <= buttonTop + OPTION_CONTROL_HEIGHT;
+    }
+
+    private boolean isInsideRemoveButton(
+            double mouseX,
+            int rowTop
+    ) {
+        int removeLeft = contentRight - 72;
+        int buttonTop = rowTop + 3;
+
+        return mouseX >= removeLeft
+                && mouseX < removeLeft + 64
+                && buttonTop <= rowTop + OPTION_ROW_HEIGHT
+                && rowTop <= buttonTop + OPTION_CONTROL_HEIGHT;
+    }
+
+    private void addListValue(
+            ConfigOptionHandle<?> option
+    ) {
+        StringListOption list =
+                new StringListOption(option);
+
+        list.add("New Entry");
+        state.markDirty();
+    }
+
+    private void removeListValue(
+            ConfigOptionHandle<?> option
+    ) {
+        StringListOption list =
+                new StringListOption(option);
+
+        list.removeSelected();
+        state.markDirty();
     }
 
     private boolean isInsideBooleanControl(
@@ -388,6 +450,12 @@ public final class ConfigScreen extends Screen {
                 && mouseX < left + OPTION_CONTROL_WIDTH
                 && top >= contentTop
                 && top + OPTION_CONTROL_HEIGHT <= contentBottom;
+    }
+
+    private boolean isStringListOption(
+            ConfigOptionHandle<?> option
+    ) {
+        return List.class.isAssignableFrom(option.valueType());
     }
 
     private boolean isBooleanOption(
@@ -427,6 +495,50 @@ public final class ConfigScreen extends Screen {
                 Component.literal(enabled ? "ON" : "OFF"),
                 left + 13,
                 top + 6,
+                0xFFFFFFFF,
+                false
+        );
+    }
+
+    private void drawListControls(
+            GuiGraphicsExtractor graphics,
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        int buttonTop = rowTop + 3;
+        int removeLeft = contentRight - 72;
+        int addLeft = removeLeft - 60;
+
+        graphics.fill(
+                addLeft,
+                buttonTop,
+                addLeft + 52,
+                buttonTop + OPTION_CONTROL_HEIGHT,
+                0xFF3E7A52
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Add"),
+                addLeft + 13,
+                buttonTop + 6,
+                0xFFFFFFFF,
+                false
+        );
+
+        graphics.fill(
+                removeLeft,
+                buttonTop,
+                removeLeft + 64,
+                buttonTop + OPTION_CONTROL_HEIGHT,
+                0xFF8A4141
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Remove"),
+                removeLeft + 7,
+                buttonTop + 6,
                 0xFFFFFFFF,
                 false
         );
