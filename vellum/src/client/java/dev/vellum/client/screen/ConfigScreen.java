@@ -4,6 +4,7 @@ import dev.vellum.client.widget.StringListOption;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -37,6 +38,8 @@ public final class ConfigScreen extends Screen {
     private int contentRight;
     private int contentBottom;
 
+    private EditBox listInputBox;
+
     public ConfigScreen(ConfigScreenState state) {
         super(Component.literal("Vellum Configuration"));
         this.state = state;
@@ -49,6 +52,18 @@ public final class ConfigScreen extends Screen {
     @Override
     protected void init() {
         updateLayout();
+
+        listInputBox = new EditBox(
+                font,
+                contentLeft + 24,
+                contentTop + 80,
+                220,
+                20,
+                Component.literal("New list item")
+        );
+
+        listInputBox.setVisible(false);
+        addRenderableWidget(listInputBox);
     }
 
     @Override
@@ -181,6 +196,25 @@ public final class ConfigScreen extends Screen {
 
             optionTop += OPTION_ROW_HEIGHT;
         }
+    }
+
+    if (state.listInputOpen()) {
+        graphics.fill(
+                contentLeft + 16,
+                contentTop + 62,
+                contentLeft + 270,
+                contentTop + 112,
+                0xFF30343B
+        );
+
+        graphics.text(
+                font,
+                Component.literal("Add list item"),
+                contentLeft + 24,
+                contentTop + 68,
+                0xFFFFFFFF,
+                false
+        );
     }
 
     private void drawOptionRow(
@@ -444,11 +478,68 @@ public final class ConfigScreen extends Screen {
     private void addListValue(
             ConfigOptionHandle<?> option
     ) {
+        state.openListInput(option);
+
+        listInputBox.setValue("");
+        listInputBox.setVisible(true);
+        setInitialFocus(listInputBox);
+    }
+
+    private void confirmListInput() {
+        String value = listInputBox.getValue().trim();
+
+        if (value.isEmpty()) {
+            return;
+        }
+
+        ConfigOptionHandle<?> option =
+                state.listInputOption();
+
+        if (option == null) {
+            return;
+        }
+
         StringListOption list =
                 new StringListOption(option);
 
-        list.add("New Entry");
+        list.add(value);
         state.markDirty();
+
+        state.closeListInput();
+        listInputBox.setValue("");
+        listInputBox.setVisible(false);
+    }
+
+    private void cancelListInput() {
+        state.closeListInput();
+
+        listInputBox.setValue("");
+        listInputBox.setVisible(false);
+    }
+
+    @Override
+    public boolean keyPressed(
+            int keyCode,
+            int scanCode,
+            int modifiers
+    ) {
+        if (state.listInputOpen()) {
+            if (keyCode == 257) {
+                confirmListInput();
+                return true;
+            }
+
+            if (keyCode == 256) {
+                cancelListInput();
+                return true;
+            }
+        }
+
+        return super.keyPressed(
+                keyCode,
+                scanCode,
+                modifiers
+        );
     }
 
     private void removeListValue(
