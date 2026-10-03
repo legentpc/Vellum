@@ -1,6 +1,7 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.widget.NumericOption;
+import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
 import dev.vellum.client.widget.StringOption;
 import dev.vellum.config.ConfigManager;
@@ -37,6 +38,7 @@ public final class ConfigScreen extends Screen {
     private final ConfigScreenState state;
     private final ConfigManager<?> configManager;
     private EditBox listInputBox;
+    private OptionMenu optionMenu;
 
     private int navigationLeft;
     private int navigationTop;
@@ -320,6 +322,31 @@ public final class ConfigScreen extends Screen {
                 left,
                 rowTop,
                 selected ? 0xFFFFFFFF : 0xFFD0D4DA,
+                false
+        );
+    }
+
+    private void drawMoreButton(
+            GuiGraphicsExtractor graphics,
+            int rowTop
+    ) {
+        int left = contentRight - 84;
+        int top = rowTop + 3;
+
+        graphics.fill(
+                left,
+                top,
+                left + 52,
+                top + OPTION_CONTROL_HEIGHT,
+                0xFF454A52
+        );
+
+        graphics.text(
+                font,
+                Component.literal("More"),
+                left + 8,
+                top + 6,
+                0xFFFFFFFF,
                 false
         );
     }
