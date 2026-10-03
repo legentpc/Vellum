@@ -8,6 +8,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
 public final class ConfigScreen extends Screen {
@@ -368,6 +370,12 @@ public final class ConfigScreen extends Screen {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouseY >= rowTop && mouseY < rowBottom) {
+                if (isBooleanOption(option)
+                        && isInsideBooleanControl(mouseX, rowTop)) {
+                    toggleBoolean(option);
+                    return true;
+                }
+
                 if (isStringListOption(option)
                         && isInsideAddButton(mouseX, rowTop)) {
                     addListValue(option);
@@ -455,7 +463,20 @@ public final class ConfigScreen extends Screen {
     private boolean isStringListOption(
             ConfigOptionHandle<?> option
     ) {
-        return List.class.isAssignableFrom(option.valueType());
+        if (!List.class.isAssignableFrom(option.valueType())) {
+            return false;
+        }
+
+        Type genericType = option.genericType();
+
+        if (!(genericType instanceof ParameterizedType parameterizedType)) {
+            return false;
+        }
+
+        Type[] arguments = parameterizedType.getActualTypeArguments();
+
+        return arguments.length == 1
+                && arguments[0] == String.class;
     }
 
     private boolean isBooleanOption(

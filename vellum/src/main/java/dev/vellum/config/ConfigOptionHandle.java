@@ -3,6 +3,7 @@ package dev.vellum.config;
 import dev.vellum.config.annotation.ConfigOption;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.Objects;
 
 public final class ConfigOptionHandle<T> {
@@ -37,6 +38,10 @@ public final class ConfigOptionHandle<T> {
     @SuppressWarnings("unchecked")
     public Class<T> valueType() {
         return (Class<T>) field.getType();
+    }
+
+    public Type genericType() {
+        return field.getGenericType();
     }
 
     @SuppressWarnings("unchecked")
