@@ -18,8 +18,7 @@ public final class StringListOption {
 
         if (!isStringList(option.genericType())) {
             throw new IllegalArgumentException(
-                    "Option must be declared as List<String>: "
-                            + option.name()
+                    "Option must be declared as List<String>: " + option.name()
             );
         }
     }
@@ -34,11 +33,8 @@ public final class StringListOption {
             return false;
         }
 
-        Type[] arguments =
-                parameterizedType.getActualTypeArguments();
-
-        return arguments.length == 1
-                && arguments[0] == String.class;
+        Type[] arguments = parameterizedType.getActualTypeArguments();
+        return arguments.length == 1 && arguments[0] == String.class;
     }
 
     public String name() {
