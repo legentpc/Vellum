@@ -4,6 +4,7 @@ import dev.vellum.client.widget.StringListOption;
 import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -62,6 +63,18 @@ public final class ConfigScreen extends Screen {
     @Override
     protected void init() {
         updateLayout();
+
+        listInputBox = new EditBox(
+                font,
+                contentLeft + 24,
+                contentTop + 80,
+                220,
+                20,
+                Component.literal("New list item")
+        );
+
+        listInputBox.setVisible(false);
+        addRenderableWidget(listInputBox);
     }
 
     @Override
@@ -434,6 +447,7 @@ public final class ConfigScreen extends Screen {
                             && mouseX < contentRight - 150) {
                         list.select(index);
                         state.selectListItem(option, index);
+                        state.beginListDrag(option, index);
                         return true;
                     }
                 }
@@ -518,11 +532,68 @@ public final class ConfigScreen extends Screen {
     private void addListValue(
             ConfigOptionHandle<?> option
     ) {
+        state.openListInput(option);
+
+        listInputBox.setValue("");
+        listInputBox.setVisible(true);
+        setInitialFocus(listInputBox);
+    }
+
+    private void confirmListInput() {
+        String value = listInputBox.getValue().trim();
+
+        if (value.isEmpty()) {
+            return;
+        }
+
+        ConfigOptionHandle<?> option =
+                state.listInputOption();
+
+        if (option == null) {
+            return;
+        }
+
         StringListOption list =
                 new StringListOption(option);
 
-        list.add("New Entry");
+        list.add(value);
         state.markDirty();
+
+        state.closeListInput();
+        listInputBox.setValue("");
+        listInputBox.setVisible(false);
+    }
+
+    private void cancelListInput() {
+        state.closeListInput();
+
+        listInputBox.setValue("");
+        listInputBox.setVisible(false);
+    }
+
+    @Override
+    public boolean keyPressed(
+            int keyCode,
+            int scanCode,
+            int modifiers
+    ) {
+        if (state.listInputOpen()) {
+            if (keyCode == 257) {
+                confirmListInput();
+                return true;
+            }
+
+            if (keyCode == 256) {
+                cancelListInput();
+                return true;
+            }
+        }
+
+        return super.keyPressed(
+                keyCode,
+                scanCode,
+                modifiers
+        );
     }
 
     private void removeListValue(
@@ -689,4 +760,34 @@ public final class ConfigScreen extends Screen {
         booleanOption.set(!readBoolean(option));
         state.markDirty();
     }
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (!state.draggingListItem()) return super.mouseDragged(event, deltaX, deltaY);
+        return true;
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (!state.draggingListItem()) return super.mouseReleased(event);
+        ConfigOptionHandle<?> option = state.draggingListOption();
+        if (option != null && state.selectedCategory() != null) {
+            int rowTop = contentTop + 42;
+            for (var currentOption : state.selectedCategory().options()) {
+                if (currentOption == option) {
+                    int target = (int) ((event.y() - rowTop - LIST_ROW_TOP_OFFSET) / LIST_ROW_HEIGHT);
+                    StringListOption list = new StringListOption(option);
+                    if (target >= 0 && target < list.values().size()) {
+                        list.move(state.draggingListIndex(), target);
+                        state.selectListItem(option, target);
+                        state.markDirty();
+                    }
+                    break;
+                }
+                rowTop += OPTION_ROW_HEIGHT;
+            }
+        }
+        state.endListDrag();
+        return true;
+    }
+
 }
