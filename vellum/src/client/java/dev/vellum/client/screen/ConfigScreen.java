@@ -1,6 +1,8 @@
 package dev.vellum.client.screen;
 
+import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.StringListOption;
+import dev.vellum.client.widget.StringOption;
 import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
@@ -33,6 +35,7 @@ public final class ConfigScreen extends Screen {
 
     private final ConfigScreenState state;
     private final ConfigManager<?> configManager;
+    private EditBox listInputBox;
 
     private int navigationLeft;
     private int navigationTop;
@@ -276,11 +279,11 @@ public final class ConfigScreen extends Screen {
                     rowTop
             );
         } else if (isStringListOption(option)) {
-            drawListControls(
-                    graphics,
-                    option,
-                    rowTop
-            );
+            drawListControls(graphics, option, rowTop);
+        } else if (isNumericOption(option)) {
+            drawNumericControl(graphics, option, rowTop);
+        } else if (isStringOption(option)) {
+            drawStringControl(graphics, option, rowTop);
         }
     }
 
@@ -433,6 +436,26 @@ public final class ConfigScreen extends Screen {
                 if (isBooleanOption(option)
                         && isInsideBooleanControl(mouseX, rowTop)) {
                     toggleBoolean(option);
+                    return true;
+                }
+
+                if (isNumericOption(option)) {
+                    NumericOption numeric = new NumericOption(option);
+                    if (isInsideNumericMinus(mouseX, mouseY, rowTop)) {
+                        numeric.decrement();
+                        state.markDirty();
+                        return true;
+                    }
+                    if (isInsideNumericPlus(mouseX, mouseY, rowTop)) {
+                        numeric.increment();
+                        state.markDirty();
+                        return true;
+                    }
+                }
+
+                if (isStringOption(option)
+                        && isInsideStringControl(mouseX, mouseY, rowTop)) {
+                    beginStringEdit(option, rowTop);
                     return true;
                 }
 
@@ -644,6 +667,70 @@ public final class ConfigScreen extends Screen {
 
         return arguments.length == 1
                 && arguments[0] == String.class;
+    }
+
+    private boolean isNumericOption(ConfigOptionHandle<?> option) {
+        Class<?> type = option.valueType();
+        return type == byte.class || type == Byte.class
+                || type == short.class || type == Short.class
+                || type == int.class || type == Integer.class
+                || type == long.class || type == Long.class
+                || type == float.class || type == Float.class
+                || type == double.class || type == Double.class;
+    }
+
+    private boolean isStringOption(ConfigOptionHandle<?> option) {
+        return option.valueType() == String.class;
+    }
+
+    private void drawNumericControl(GuiGraphicsExtractor graphics, ConfigOptionHandle<?> option, int rowTop) {
+        NumericOption numeric = new NumericOption(option);
+        int top = rowTop + 3;
+        int plusLeft = contentRight - 38;
+        int minusLeft = plusLeft - 24;
+
+        graphics.fill(minusLeft, top, minusLeft + 20, top + OPTION_CONTROL_HEIGHT, 0xFF454A52);
+        graphics.text(font, Component.literal("-"), minusLeft + 7, top + 5, 0xFFFFFFFF, false);
+        graphics.text(font, Component.literal(numeric.value().toString()), minusLeft - 42, top + 5, 0xFFFFFFFF, false);
+        graphics.fill(plusLeft, top, plusLeft + 20, top + OPTION_CONTROL_HEIGHT, 0xFF3E7A52);
+        graphics.text(font, Component.literal("+"), plusLeft + 7, top + 5, 0xFFFFFFFF, false);
+    }
+
+    private void drawStringControl(GuiGraphicsExtractor graphics, ConfigOptionHandle<?> option, int rowTop) {
+        StringOption string = new StringOption(option);
+        int left = contentRight - 210;
+        int top = rowTop + 3;
+        graphics.fill(left, top, contentRight - 18, top + OPTION_CONTROL_HEIGHT, 0xFF2A2E35);
+        graphics.text(font, Component.literal(string.value()), left + 8, top + 5, 0xFFFFFFFF, false);
+    }
+
+    private boolean isInsideNumericMinus(double mouseX, double mouseY, int rowTop) {
+        int left = contentRight - 62;
+        return mouseX >= left && mouseX < left + 20
+                && mouseY >= rowTop + 3
+                && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
+    }
+
+    private boolean isInsideNumericPlus(double mouseX, double mouseY, int rowTop) {
+        int left = contentRight - 38;
+        return mouseX >= left && mouseX < left + 20
+                && mouseY >= rowTop + 3
+                && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
+    }
+
+    private boolean isInsideStringControl(double mouseX, double mouseY, int rowTop) {
+        int left = contentRight - 210;
+        return mouseX >= left && mouseX < contentRight - 18
+                && mouseY >= rowTop + 3
+                && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
+    }
+
+    private void beginStringEdit(ConfigOptionHandle<?> option, int rowTop) {
+        StringOption string = new StringOption(option);
+        listInputBox.setValue(string.value());
+        listInputBox.setY(rowTop + 3);
+        listInputBox.setVisible(true);
+        setInitialFocus(listInputBox);
     }
 
     private boolean isBooleanOption(
