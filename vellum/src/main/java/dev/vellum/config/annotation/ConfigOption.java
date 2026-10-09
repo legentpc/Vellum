@@ -10,6 +10,8 @@ import java.lang.annotation.Target;
 public @interface ConfigOption {
     String name();
 
+    String defaultValue() default "";
+
     String description() default "";
 
     String category() default "general";

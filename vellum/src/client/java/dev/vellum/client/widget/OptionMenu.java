@@ -1,11 +1,14 @@
 package dev.vellum.client.widget;
 
+import com.google.gson.Gson;
+
 import dev.vellum.config.ConfigOptionHandle;
 
 import java.util.Objects;
 
 public final class OptionMenu {
     private final ConfigOptionHandle<?> option;
+    private final Gson gson;
     private boolean open;
 
     public OptionMenu(
@@ -15,6 +18,8 @@ public final class OptionMenu {
                 option,
                 "option"
         );
+
+        this.gson = new Gson();
     }
 
     public ConfigOptionHandle<?> option() {
@@ -38,6 +43,7 @@ public final class OptionMenu {
     }
 
     public void reset() {
+        option.resetToDefault(gson);
         hide();
     }
 

@@ -1,5 +1,9 @@
 package dev.vellum.config;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import dev.vellum.config.annotation.ConfigOption;
 
 import java.lang.reflect.Field;
@@ -65,5 +69,39 @@ public final class ConfigOptionHandle<T> {
                     exception
             );
         }
+    }
+
+    public String defaultValue() {
+        return metadata.defaultValue();
+    }
+
+    public void resetToDefault(
+            Gson gson
+    ) {
+        String rawDefault =
+                metadata.defaultValue();
+
+        if (rawDefault.isBlank()) {
+            throw new IllegalStateException(
+                    "No default value configured for option: "
+                            + name()
+            );
+        }
+
+        JsonElement value =
+                JsonParser.parseString(rawDefault);
+
+        Object parsed =
+                gson.fromJson(
+                        value,
+                        genericType()
+                );
+
+        setParsed(parsed);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setParsed(Object value) {
+        ((ConfigOptionHandle<Object>) this).set(value);
     }
 }
