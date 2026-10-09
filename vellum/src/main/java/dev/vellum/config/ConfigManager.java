@@ -18,10 +18,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public final class ConfigManager<T extends Config> {
     private final T config;
@@ -124,9 +126,14 @@ public final class ConfigManager<T extends Config> {
         }
     }
 
-    private Map<String, List<ConfigOptionHandle<?>>> scanOptions(T config) {
+    private Map<String, List<ConfigOptionHandle<?>>> scanOptions(
+            T config
+    ) {
         Map<String, List<ConfigOptionHandle<?>>> result =
                 new LinkedHashMap<>();
+
+        Set<String> optionNames =
+                new HashSet<>();
 
         for (Class<?> type = config.getClass();
              type != null && type != Object.class;
@@ -138,6 +145,13 @@ public final class ConfigManager<T extends Config> {
 
                 if (metadata == null) {
                     continue;
+                }
+
+                if (!optionNames.add(metadata.name())) {
+                    throw new IllegalArgumentException(
+                            "Duplicate config option name: "
+                                    + metadata.name()
+                    );
                 }
 
                 ConfigOptionHandle<?> handle =
