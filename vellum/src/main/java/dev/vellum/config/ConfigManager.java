@@ -168,7 +168,13 @@ public final class ConfigManager<T extends Config> {
         } else if (type == String.class) {
             set(option, value.getAsString());
         } else {
-            set(option, gson.fromJson(value, type));
+            set(
+                    option,
+                    gson.fromJson(
+                            value,
+                            option.genericType()
+                    )
+            );
         }
     }
 
