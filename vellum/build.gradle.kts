@@ -37,8 +37,12 @@ tasks.withType<JavaCompile>().configureEach {
     options.release = 25
 }
 
+val projectName = project.name
+
 tasks.jar {
     from(rootProject.file("LICENSE")) {
-        rename { "${it}_${project.name}" }
+        rename { fileName ->
+            "${fileName}_${projectName}"
+        }
     }
 }
