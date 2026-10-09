@@ -10,9 +10,15 @@ import java.lang.annotation.Target;
 public @interface ConfigOption {
     String name();
 
-    String defaultValue() default "";
-
     String description() default "";
 
     String category() default "general";
+
+    String defaultValue() default "";
+
+    double min() default -Double.MAX_VALUE;
+
+    double max() default Double.MAX_VALUE;
+
+    double step() default 1.0D;
 }

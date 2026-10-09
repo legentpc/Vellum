@@ -104,4 +104,16 @@ public final class ConfigOptionHandle<T> {
     private void setParsed(Object value) {
         ((ConfigOptionHandle<Object>) this).set(value);
     }
+
+    public double min() {
+        return metadata.min();
+    }
+
+    public double max() {
+        return metadata.max();
+    }
+
+    public double step() {
+        return metadata.step();
+    }
 }

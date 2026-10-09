@@ -16,14 +16,22 @@ public final class VellumTestConfig extends Config {
     @ConfigOption(
             name = "Speed",
             description = "Test feature speed",
-            category = "General"
+            category = "General",
+            defaultValue = "10",
+            min = 0,
+            max = 100,
+            step = 5
     )
     public int speed = 10;
 
     @ConfigOption(
             name = "Scale",
             description = "Test feature scale",
-            category = "General"
+            category = "General",
+            defaultValue = "1.0",
+            min = 0.1,
+            max = 5.0,
+            step = 0.1
     )
     public double scale = 1.0D;
 
