@@ -5,14 +5,17 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import dev.vellum.config.annotation.ConfigOption;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -89,11 +92,35 @@ public final class ConfigManager<T extends Config> {
         JsonObject values = new JsonObject();
 
         for (ConfigOptionHandle<?> option : allOptions()) {
-            values.add(option.name(), gson.toJsonTree(option.get()));
+            values.add(
+                    option.name(),
+                    gson.toJsonTree(option.get())
+            );
         }
 
-        try (Writer writer = Files.newBufferedWriter(file)) {
+        Path temporaryFile =
+                file.resolveSibling(
+                        file.getFileName() + ".tmp"
+                );
+
+        try (Writer writer =
+                     Files.newBufferedWriter(temporaryFile)) {
             gson.toJson(values, writer);
+        }
+
+        try {
+            Files.move(
+                    temporaryFile,
+                    file,
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE
+            );
+        } catch (AtomicMoveNotSupportedException exception) {
+            Files.move(
+                    temporaryFile,
+                    file,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
         }
     }
 
