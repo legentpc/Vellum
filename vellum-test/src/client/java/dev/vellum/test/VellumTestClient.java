@@ -1,4 +1,4 @@
-package dev.vellum.client;
+package dev.vellum.test;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -7,7 +7,6 @@ import dev.vellum.client.navigation.CategoryTree;
 import dev.vellum.client.screen.ConfigScreen;
 import dev.vellum.client.screen.ConfigScreenState;
 import dev.vellum.config.ConfigManager;
-import dev.vellum.config.VellumTestConfig;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -21,109 +20,55 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public final class VellumClient
+public final class VellumTestClient
         implements ClientModInitializer {
-    public static final Logger LOGGER =
+    private static final Logger LOGGER =
             LoggerFactory.getLogger(
-                    "vellumconfig-client"
+                    "vellumconfig-test"
             );
 
-    private static ConfigManager<?> configManager;
+    private ConfigManager<VellumTestConfig>
+            configManager;
 
     @Override
     public void onInitializeClient() {
-        LOGGER.info(
-                "Vellum client initialized."
-        );
-
-        initializeTestConfig();
-        registerVellumCommand();
+        initializeConfig();
+        registerCommand();
     }
 
-    private void initializeTestConfig() {
+    private void initializeConfig() {
         VellumTestConfig config =
                 new VellumTestConfig();
 
-        ConfigManager<VellumTestConfig> manager =
+        configManager =
                 new ConfigManager<>(
                         config,
                         Path.of(
                                 "config",
-                                "vellum.json"
+                                "vellum-test.json"
                         )
                 );
 
         try {
-            manager.load();
-
-            LOGGER.info(
-                    "Vellum test configuration loaded from {}.",
-                    manager.file()
-            );
+            configManager.load();
         } catch (IOException exception) {
             LOGGER.error(
-                    "Unable to load Vellum configuration",
+                    "Unable to load Vellum test configuration",
                     exception
             );
         }
-
-        setConfigManager(manager);
-
-        LOGGER.info(
-                "Vellum test config manager initialized."
-        );
     }
 
-    public static void openConfigScreen(
-            ConfigManager<?> manager
-    ) {
-        LOGGER.info(
-                "Preparing Vellum configuration screen."
-        );
-
-        CategoryTree tree =
-                CategoryTree.fromConfigManager(
-                        manager
-                );
-
-        LOGGER.info(
-                "Vellum category tree contains {} visible nodes.",
-                tree.visibleNodes().size()
-        );
-
-        ConfigScreenState state =
-                new ConfigScreenState(tree);
-
-        Minecraft.getInstance().setScreen(
-                new ConfigScreen(
-                        state,
-                        manager
-                )
-        );
-
-        LOGGER.info(
-                "Vellum configuration screen submitted to Minecraft."
-        );
-    }
-
-    private void registerVellumCommand() {
-        LOGGER.info(
-                "Registering Vellum client command callback."
-        );
-
+    private void registerCommand() {
         ClientCommandRegistrationCallback.EVENT.register(
-                (dispatcher, ignoredRegistryAccess) -> {
-                    LOGGER.info(
-                            "Registering /vellum command."
-                    );
-
-                    registerCommand(dispatcher);
-                }
+                (dispatcher, ignoredRegistryAccess) ->
+                        registerVellumCommand(dispatcher)
         );
     }
 
-    private void registerCommand(
-            CommandDispatcher<FabricClientCommandSource> dispatcher
+    private void registerVellumCommand(
+            CommandDispatcher<FabricClientCommandSource>
+                    dispatcher
     ) {
         LiteralArgumentBuilder<FabricClientCommandSource>
                 command =
@@ -132,29 +77,27 @@ public final class VellumClient
                 );
 
         command.executes(ignoredContext -> {
-            LOGGER.info(
-                    "Opening Vellum test configuration screen."
-            );
-
-            if (configManager == null) {
-                LOGGER.error(
-                        "Cannot open Vellum screen: "
-                                + "config manager is null."
-                );
-
-                return 0;
-            }
-
-            openConfigScreen(configManager);
+            openConfigScreen();
             return 1;
         });
 
         dispatcher.register(command);
     }
 
-    public static void setConfigManager(
-            ConfigManager<?> manager
-    ) {
-        configManager = manager;
+    private void openConfigScreen() {
+        CategoryTree tree =
+                CategoryTree.fromConfigManager(
+                        configManager
+                );
+
+        ConfigScreenState state =
+                new ConfigScreenState(tree);
+
+        Minecraft.getInstance().setScreen(
+                new ConfigScreen(
+                        state,
+                        configManager
+                )
+        );
     }
 }

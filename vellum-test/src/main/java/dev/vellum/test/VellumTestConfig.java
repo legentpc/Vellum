@@ -1,15 +1,18 @@
-package dev.vellum.config;
+package dev.vellum.test;
 
+import dev.vellum.config.Config;
 import dev.vellum.config.annotation.ConfigOption;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class VellumTestConfig extends Config {
+public final class VellumTestConfig
+        extends Config {
     @ConfigOption(
             name = "Enabled",
             description = "Enable the test feature",
-            category = "General"
+            category = "General",
+            defaultValue = "true"
     )
     public boolean enabled = true;
 
@@ -38,19 +41,23 @@ public final class VellumTestConfig extends Config {
     @ConfigOption(
             name = "Display Name",
             description = "Name shown by the test feature",
-            category = "General"
+            category = "General",
+            defaultValue = "Vellum"
     )
     public String displayName = "Vellum";
 
     @ConfigOption(
             name = "Entries",
             description = "Test string entries",
-            category = "Lists"
+            category = "Lists",
+            defaultValue = "[\"First Entry\", \"Second Entry\", \"Third Entry\"]"
     )
     public List<String> entries =
-            new ArrayList<>(List.of(
-                    "First Entry",
-                    "Second Entry",
-                    "Third Entry"
-            ));
+            new ArrayList<>(
+                    List.of(
+                            "First Entry",
+                            "Second Entry",
+                            "Third Entry"
+                    )
+            );
 }
