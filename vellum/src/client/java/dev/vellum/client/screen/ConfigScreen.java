@@ -21,8 +21,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 
+import dev.vellum.platform.VellumPlatform;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class ConfigScreen
         extends VellumScreenComponent {
@@ -45,7 +45,7 @@ public final class ConfigScreen
     private final ConfigScreenInputHandler inputHandler;
 
     private static final Logger LOGGER =
-            LoggerFactory.getLogger(
+            VellumPlatform.logger(
                     "vellumconfig-client"
             );
 
