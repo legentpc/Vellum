@@ -120,6 +120,14 @@ public final class ConfigScreen
 
         updateLayout();
 
+        VellumRenderContext renderContext =
+                new MinecraftRenderContext(
+                        graphics,
+                        font,
+                        width,
+                        height
+                );
+
         renderer.drawBackground(
                 renderContext
         );

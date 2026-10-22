@@ -57,8 +57,7 @@ public final class ConfigScreenRenderer {
                 title,
                 PANEL_MARGIN + 10,
                 PANEL_MARGIN + 10,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
