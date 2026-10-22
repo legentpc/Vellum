@@ -1160,11 +1160,4 @@ public final class ConfigScreen
 
         return true;
     }
-
-    @Override
-    protected void beforeScreenClose() {
-        if (editor.dirty()) {
-            editor.openCloseWarning();
-        }
-    }
 }
