@@ -55,10 +55,6 @@ public final class VellumConfigEditor {
         );
     }
 
-    public ConfigScreenState state() {
-        return state;
-    }
-
     public ConfigManager<?> configManager() {
         return configManager;
     }

@@ -1,7 +1,7 @@
 package dev.vellum.client.screen;
 
+import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.navigation.CategoryNode;
-import dev.vellum.client.screen.ConfigScreenState;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.config.ConfigOptionHandle;
 
@@ -66,7 +66,7 @@ public final class ConfigScreenRenderer {
 
     public void drawNavigationPanel(
             GuiGraphicsExtractor graphics,
-            ConfigScreenState state,
+            VellumConfigEditor editor,
             int navigationLeft,
             int navigationTop,
             int navigationRight,
@@ -92,10 +92,10 @@ public final class ConfigScreenRenderer {
         int rowTop = navigationTop + 32;
 
         for (CategoryNode category
-                : state.categoryTree().visibleNodes()) {
+                : editor.categoryTree().visibleNodes()) {
             drawCategoryRow(
                     graphics,
-                    state,
+                    editor,
                     category,
                     rowTop,
                     navigationLeft,
@@ -108,14 +108,14 @@ public final class ConfigScreenRenderer {
 
     private void drawCategoryRow(
             GuiGraphicsExtractor graphics,
-            ConfigScreenState state,
+            VellumConfigEditor editor,
             CategoryNode category,
             int rowTop,
             int navigationLeft,
             int navigationRight
     ) {
         boolean selected =
-                state.selectedCategory() == category;
+                editor.selectedCategory() == category;
 
         if (selected) {
             graphics.fill(
@@ -153,7 +153,7 @@ public final class ConfigScreenRenderer {
 
     public void drawContentPanelHeader(
             GuiGraphicsExtractor graphics,
-            ConfigScreenState state,
+            VellumConfigEditor editor,
             int contentLeft,
             int contentTop,
             int contentRight,
@@ -168,10 +168,10 @@ public final class ConfigScreenRenderer {
         );
 
         Component selectedTitle =
-                state.selectedCategory() == null
+                editor.selectedCategory() == null
                         ? Component.literal("Select a category")
                         : Component.literal(
-                        state.selectedCategory().title()
+                        editor.selectedCategory().title()
                 );
 
         graphics.text(
@@ -185,7 +185,7 @@ public final class ConfigScreenRenderer {
     }
     public void drawSaveButton(
             GuiGraphicsExtractor graphics,
-            ConfigScreenState state,
+            VellumConfigEditor editor,
             int contentRight,
             int contentBottom
     ) {
@@ -204,7 +204,7 @@ public final class ConfigScreenRenderer {
                 top,
                 left + SAVE_BUTTON_WIDTH,
                 top + SAVE_BUTTON_HEIGHT,
-                state.dirty()
+                editor.dirty()
                         ? 0xFF3E7A52
                         : 0xFF454A52
         );
@@ -262,11 +262,11 @@ public final class ConfigScreenRenderer {
 
     public void drawCloseWarning(
             GuiGraphicsExtractor graphics,
-            ConfigScreenState state,
+            VellumConfigEditor editor,
             int width,
             int height
     ) {
-        if (!state.closeWarningOpen()) {
+        if (!editor.closeWarningOpen()) {
             return;
         }
 

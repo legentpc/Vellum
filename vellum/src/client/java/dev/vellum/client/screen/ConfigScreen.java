@@ -132,7 +132,7 @@ public final class ConfigScreen
 
         renderer.drawNavigationPanel(
                 graphics,
-                editor.state(),
+                editor,
                 navigationLeft,
                 navigationTop,
                 navigationRight,
@@ -229,7 +229,7 @@ public final class ConfigScreen
     ) {
         renderer.drawContentPanelHeader(
                 graphics,
-                editor.state(),
+                editor,
                 contentLeft,
                 contentTop,
                 contentRight,
@@ -239,7 +239,7 @@ public final class ConfigScreen
         if (editor.selectedCategory() == null) {
             renderer.drawSaveButton(
                     graphics,
-                    editor.state(),
+                    editor,
                     contentRight,
                     contentBottom
             );
@@ -260,7 +260,7 @@ public final class ConfigScreen
 
         renderer.drawSaveButton(
                 graphics,
-                editor.state(),
+                editor,
                 contentRight,
                 contentBottom
         );
@@ -273,7 +273,7 @@ public final class ConfigScreen
         );
         renderer.drawCloseWarning(
                 graphics,
-                editor.state(),
+                editor,
                 width,
                 height
         );
