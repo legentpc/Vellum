@@ -83,19 +83,18 @@ public final class VellumTestClient
     }
 
     private void openConfigScreen() {
-        CategoryTree tree =
-                CategoryTree.fromConfigManager(
-                        configManager
-                );
+        public static VellumConfigEditor create(
+                ConfigManager<?> configManager
+        ) {
+            CategoryTree tree =
+                    CategoryTree.fromConfigManager(
+                            configManager
+                    );
 
-        ConfigScreenState state =
-                new ConfigScreenState(tree);
-
-        VellumPlatform.openScreen(
-                new ConfigScreen(
-                        state,
-                        configManager
-                )
-        );
+            return new VellumConfigEditor(
+                    new ConfigScreenState(tree),
+                    configManager
+            );
+        }
     }
 }

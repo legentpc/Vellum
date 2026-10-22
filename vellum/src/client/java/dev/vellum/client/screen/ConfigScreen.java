@@ -63,27 +63,17 @@ public final class ConfigScreen
     private ConfigScreenRenderer renderer;
 
     public ConfigScreen(
-            ConfigScreenState state,
-            ConfigManager<?> configManager
+            VellumConfigEditor editor
     ) {
         super(Component.literal("Vellum Configuration"));
 
-        ConfigScreenState checkedState =
-                Objects.requireNonNull(
-                        state,
-                        "state"
-                );
-
-        this.configManager = Objects.requireNonNull(
-                configManager,
-                "configManager"
+        this.editor = Objects.requireNonNull(
+                editor,
+                "editor"
         );
 
-        this.editor =
-                new VellumConfigEditor(
-                        checkedState,
-                        this.configManager
-                );
+        this.configManager =
+                editor.configManager();
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
