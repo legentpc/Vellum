@@ -32,7 +32,9 @@ public abstract class VellumScreenComponent
         beforeScreenClose();
 
         if (minecraft != null) {
-            super.onClose();
+            minecraft.setScreen(
+                    previousScreen
+            );
         }
     }
 
