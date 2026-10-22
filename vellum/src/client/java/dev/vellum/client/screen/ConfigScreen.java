@@ -543,7 +543,10 @@ public final class ConfigScreen
 
                     int index =
                             inputHandler.listItemIndex(
-                                    mouse,
+                                    new VellumMousePosition(
+                                            mouseX,
+                                            mouseY
+                                    ),
                                     contentLeft,
                                     contentRight,
                                     listTop,
@@ -1111,7 +1114,10 @@ public final class ConfigScreen
 
         int index =
                 inputHandler.listItemIndex(
-                        mouse,
+                        new VellumMousePosition(
+                                mouseX,
+                                mouseY
+                        ),
                         contentLeft,
                         contentRight,
                         listTop,
