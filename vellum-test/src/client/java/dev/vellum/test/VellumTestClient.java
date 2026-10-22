@@ -7,21 +7,20 @@ import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.screen.ConfigScreen;
 import dev.vellum.config.ConfigManager;
 import dev.vellum.platform.VellumPlatform;
+import dev.vellum.platform.api.VellumLogger;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 public final class VellumTestClient
         implements ClientModInitializer {
-    private static final Logger LOGGER =
+    private static final VellumLogger LOGGER =
             VellumPlatform.logger(
-                    "vellumconfig-client"
+                    "vellumconfig-test"
             );
 
     private ConfigManager<VellumTestConfig>

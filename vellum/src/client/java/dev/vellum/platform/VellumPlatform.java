@@ -11,7 +11,6 @@ import net.minecraft.resources.Identifier;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
@@ -43,7 +42,7 @@ public final class VellumPlatform {
         return minecraft().level != null;
     }
 
-    public static Logger logger(
+    public static VellumLogger logger(
             String name
     ) {
         Objects.requireNonNull(
@@ -51,7 +50,9 @@ public final class VellumPlatform {
                 "name"
         );
 
-        return LoggerFactory.getLogger(name);
+        return new Slf4jVellumLogger(
+                LoggerFactory.getLogger(name)
+        );
     }
 
     public static Font font() {
@@ -76,13 +77,5 @@ public final class VellumPlatform {
                         )
                 )
                 .open();
-    }
-
-    public static VellumLogger logger(
-            String name
-    ) {
-        return new Slf4jVellumLogger(
-                LoggerFactory.getLogger(name)
-        );
     }
 }
