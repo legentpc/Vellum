@@ -398,14 +398,8 @@ public final class ConfigScreen
             MouseButtonEvent click,
             boolean doubled
     ) {
-        VellumMousePosition mouse =
-                new VellumMousePosition(
-                        click.x(),
-                        click.y()
-                );
-
-        double mouseX = mouse.x();
-        double mouseY = mouse.y();
+        double mouseX = click.x();
+        double mouseY = click.y();
 
         if (click.button() != 0) {
             return super.mouseClicked(click, doubled);
@@ -453,8 +447,7 @@ public final class ConfigScreen
             double mouseY
     ) {
         return inputHandler.isInsideNavigation(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 navigationLeft,
                 navigationTop,
                 navigationRight,
@@ -467,8 +460,7 @@ public final class ConfigScreen
             double mouseY
     ) {
         return inputHandler.isInsideContent(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 contentLeft,
                 contentTop,
                 contentRight,
@@ -543,10 +535,8 @@ public final class ConfigScreen
 
                     int index =
                             inputHandler.listItemIndex(
-                                    new VellumMousePosition(
-                                            mouseX,
-                                            mouseY
-                                    ),
+                                    mouseX,
+                                    mouseY,
                                     contentLeft,
                                     contentRight,
                                     listTop,
@@ -612,8 +602,7 @@ public final class ConfigScreen
             double mouseY
     ) {
         return inputHandler.isInsideSaveButton(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 contentRight,
                 contentBottom,
                 SAVE_BUTTON_WIDTH,
@@ -627,8 +616,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         return inputHandler.isInsideMoreButton(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 contentRight,
                 rowTop,
                 OPTION_CONTROL_HEIGHT
@@ -651,7 +639,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         return inputHandler.isInsideAddButton(
-                mouseX,
+                new VellumMousePosition(mouseX, 0),
                 contentRight,
                 rowTop,
                 OPTION_ROW_HEIGHT,
@@ -664,7 +652,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         return inputHandler.isInsideRemoveButton(
-                mouseX,
+                new VellumMousePosition(mouseX, 0),
                 contentRight,
                 rowTop,
                 OPTION_ROW_HEIGHT,
@@ -820,8 +808,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         return inputHandler.isInsideNumericMinus(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 contentRight,
                 rowTop,
                 OPTION_CONTROL_HEIGHT
@@ -834,8 +821,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         return inputHandler.isInsideNumericPlus(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 contentRight,
                 rowTop,
                 OPTION_CONTROL_HEIGHT
@@ -848,8 +834,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         return inputHandler.isInsideStringControl(
-                mouseX,
-                mouseY,
+                new VellumMousePosition(mouseX, mouseY),
                 contentRight,
                 rowTop,
                 OPTION_CONTROL_HEIGHT
@@ -1114,10 +1099,8 @@ public final class ConfigScreen
 
         int index =
                 inputHandler.listItemIndex(
-                        new VellumMousePosition(
-                                mouseX,
-                                mouseY
-                        ),
+                        mouseX,
+                        mouseY,
                         contentLeft,
                         contentRight,
                         listTop,
