@@ -81,10 +81,6 @@ public final class ConfigScreen
                 new ConfigScreenInputHandler();
     }
 
-    public ConfigScreenState state() {
-        return editor.state();
-    }
-
     @Override
     protected void init() {
         LOGGER.info(
