@@ -7,12 +7,11 @@ import dev.vellum.client.navigation.CategoryTree;
 import dev.vellum.client.screen.ConfigScreen;
 import dev.vellum.client.screen.ConfigScreenState;
 import dev.vellum.config.ConfigManager;
+import dev.vellum.platform.VellumPlatform;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-
-import dev.vellum.test.platform.VellumPlatform;
 
 import org.slf4j.Logger;
 
