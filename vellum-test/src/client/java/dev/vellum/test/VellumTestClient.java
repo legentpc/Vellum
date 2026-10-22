@@ -3,6 +3,7 @@ package dev.vellum.test;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.navigation.CategoryTree;
 import dev.vellum.client.screen.ConfigScreen;
 import dev.vellum.client.screen.ConfigScreenState;

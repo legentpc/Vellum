@@ -130,6 +130,20 @@ public final class VellumConfigEditor {
         state.openListInput(option);
     }
 
+    public static VellumConfigEditor create(
+            ConfigManager<?> configManager
+    ) {
+        CategoryTree tree =
+                CategoryTree.fromConfigManager(
+                        configManager
+                );
+
+        return new VellumConfigEditor(
+                new ConfigScreenState(tree),
+                configManager
+        );
+    }
+
     public void closeListInput() {
         state.closeListInput();
     }
