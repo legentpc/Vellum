@@ -3,6 +3,11 @@ package dev.vellum.platform;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.Font;
+import net.minecraft.resources.Identifier;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +49,26 @@ public final class VellumPlatform {
         );
 
         return LoggerFactory.getLogger(name);
+    }
+
+    public static InputStream openResource(
+            Identifier identifier
+    ) throws IOException {
+        Objects.requireNonNull(
+                identifier,
+                "identifier"
+        );
+
+        return minecraft()
+                .getResourceManager()
+                .getResource(identifier)
+                .orElseThrow(
+                        () -> new IOException(
+                                "Resource not found: "
+                                        + identifier
+                        )
+                )
+                .open();
     }
 
     public static Font font() {
