@@ -89,7 +89,7 @@ public final class ConfigScreenRenderer {
         for (CategoryNode category
                 : editor.categoryTree().visibleNodes()) {
             drawCategoryRow(
-                    graphics,
+                    context,
                     editor,
                     category,
                     rowTop,
@@ -338,12 +338,10 @@ public final class ConfigScreenRenderer {
 
         if (!option.description().isBlank()) {
             context.text(
-                    font,
                     Component.literal(option.description()),
                     contentLeft + 18,
                     rowTop + 16,
-                    0xFFB8BEC8,
-                    false
+                    0xFFB8BEC8
             );
         }
     }
@@ -506,7 +504,7 @@ public final class ConfigScreenRenderer {
 
         for (int index = 0; index < values.size(); index++) {
             drawListItem(
-                    graphics,
+                    context,
                     values.get(index),
                     index,
                     selectedOption && selectedIndex == index,
@@ -518,7 +516,7 @@ public final class ConfigScreenRenderer {
         }
 
         drawListButtons(
-                graphics,
+                context,
                 contentRight,
                 rowTop,
                 optionControlHeight
