@@ -2,6 +2,7 @@ package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.navigation.CategoryNode;
+import dev.vellum.client.render.VellumRenderContext;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.config.ConfigOptionHandle;
 
@@ -28,25 +29,23 @@ public final class ConfigScreenRenderer {
     }
 
     public void drawBackground(
-            GuiGraphicsExtractor graphics,
-            int width,
-            int height
+            VellumRenderContext context
     ) {
-        graphics.fill(
+        context.fill(
                 0,
                 0,
-                width,
-                height,
+                context.width(),
+                context.height(),
                 0xFF101216
         );
     }
 
     public void drawHeader(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             Component title,
             int width
     ) {
-        graphics.fill(
+        context.fill(
                 PANEL_MARGIN,
                 PANEL_MARGIN,
                 width - PANEL_MARGIN,
@@ -54,8 +53,7 @@ public final class ConfigScreenRenderer {
                 0xFF1B1E24
         );
 
-        graphics.text(
-                font,
+        context.text(
                 title,
                 PANEL_MARGIN + 10,
                 PANEL_MARGIN + 10,

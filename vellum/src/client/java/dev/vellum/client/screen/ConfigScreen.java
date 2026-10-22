@@ -1,6 +1,8 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
+import dev.vellum.client.render.MinecraftRenderContext;
+import dev.vellum.client.render.VellumRenderContext;
 import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
@@ -119,13 +121,11 @@ public final class ConfigScreen
         updateLayout();
 
         renderer.drawBackground(
-                graphics,
-                width,
-                height
+                renderContext
         );
 
         renderer.drawHeader(
-                graphics,
+                renderContext,
                 title,
                 width
         );
