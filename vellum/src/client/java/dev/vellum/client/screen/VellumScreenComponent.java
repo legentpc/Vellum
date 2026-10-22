@@ -5,11 +5,20 @@ import net.minecraft.network.chat.Component;
 
 public abstract class VellumScreenComponent
         extends Screen {
+    private final Screen previousScreen;
 
     protected VellumScreenComponent(
-            Component title
+            Component title,
+            Screen previousScreen
     ) {
         super(title);
+
+        this.previousScreen =
+                previousScreen;
+    }
+
+    protected final Screen previousScreen() {
+        return previousScreen;
     }
 
     protected void beforeScreenClose() {

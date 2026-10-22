@@ -9,6 +9,7 @@ import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -61,9 +62,15 @@ public final class ConfigScreen
     private ConfigScreenRenderer renderer;
 
     public ConfigScreen(
-            VellumConfigEditor editor
+            VellumConfigEditor editor,
+            Screen previousScreen
     ) {
-        super(Component.literal("Vellum Configuration"));
+        super(
+                Component.literal(
+                        "Vellum Configuration"
+                ),
+                previousScreen
+        );
 
         this.editor = Objects.requireNonNull(
                 editor,

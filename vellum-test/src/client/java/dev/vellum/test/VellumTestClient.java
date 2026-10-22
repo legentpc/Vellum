@@ -88,7 +88,10 @@ public final class VellumTestClient
                 );
 
         VellumPlatform.openScreen(
-                new ConfigScreen(editor)
+                new ConfigScreen(
+                        editor,
+                        VellumPlatform.currentScreen()
+                )
         );
     }
 }
