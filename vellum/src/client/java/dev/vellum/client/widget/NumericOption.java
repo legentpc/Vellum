@@ -50,32 +50,47 @@ public final class NumericOption {
         write(changeBy(-step()));
     }
 
-    private Number changeBy(double amount) {
+    private Number changeBy(
+            double amount
+    ) {
         Number current = value();
         Class<?> type = option.valueType();
-        double changed = current.doubleValue() + amount;
 
-        if (type == byte.class || type == Byte.class) {
+        double changed =
+                current.doubleValue() + amount;
+
+        changed = Math.max(
+                option.min(),
+                Math.min(option.max(), changed)
+        );
+
+        if (type == byte.class
+                || type == Byte.class) {
             return (byte) changed;
         }
 
-        if (type == short.class || type == Short.class) {
+        if (type == short.class
+                || type == Short.class) {
             return (short) changed;
         }
 
-        if (type == int.class || type == Integer.class) {
+        if (type == int.class
+                || type == Integer.class) {
             return (int) changed;
         }
 
-        if (type == long.class || type == Long.class) {
+        if (type == long.class
+                || type == Long.class) {
             return (long) changed;
         }
 
-        if (type == float.class || type == Float.class) {
+        if (type == float.class
+                || type == Float.class) {
             return (float) changed;
         }
 
-        if (type == double.class || type == Double.class) {
+        if (type == double.class
+                || type == Double.class) {
             return changed;
         }
 
@@ -86,16 +101,7 @@ public final class NumericOption {
     }
 
     private double step() {
-        Class<?> type = option.valueType();
-
-        if (type == float.class
-                || type == Float.class
-                || type == double.class
-                || type == Double.class) {
-            return 0.1D;
-        }
-
-        return 1D;
+        return option.step();
     }
 
     @SuppressWarnings("unchecked")

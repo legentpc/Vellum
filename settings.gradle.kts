@@ -15,4 +15,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "vellum"
 
-include(":vellum")
+include(
+    ":vellum",
+    ":vellum-test"
+)

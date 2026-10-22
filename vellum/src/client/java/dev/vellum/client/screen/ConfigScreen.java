@@ -1,5 +1,6 @@
 package dev.vellum.client.screen;
 
+import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
@@ -14,8 +15,8 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
-import java.lang.reflect.ParameterizedType;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +24,8 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class ConfigScreen extends Screen {
+public final class ConfigScreen
+        extends VellumScreenComponent {
     private static final int PANEL_MARGIN = 24;
     private static final int HEADER_HEIGHT = 32;
     private static final int NAVIGATION_WIDTH = 180;
@@ -38,8 +40,9 @@ public final class ConfigScreen extends Screen {
     private static final int SAVE_BUTTON_WIDTH = 64;
     private static final int SAVE_BUTTON_HEIGHT = 20;
 
-    private final ConfigScreenState state;
+    private final VellumConfigEditor editor;
     private final ConfigManager<?> configManager;
+    private final ConfigScreenInputHandler inputHandler;
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(
@@ -58,21 +61,37 @@ public final class ConfigScreen extends Screen {
 
     private EditBox listInputBox;
     private OptionMenu optionMenu;
+    private ConfigScreenRenderer renderer;
 
     public ConfigScreen(
             ConfigScreenState state,
             ConfigManager<?> configManager
     ) {
         super(Component.literal("Vellum Configuration"));
-        this.state = Objects.requireNonNull(state, "state");
+
+        ConfigScreenState checkedState =
+                Objects.requireNonNull(
+                        state,
+                        "state"
+                );
+
         this.configManager = Objects.requireNonNull(
                 configManager,
                 "configManager"
         );
+
+        this.editor =
+                new VellumConfigEditor(
+                        checkedState,
+                        this.configManager
+                );
+
+        this.inputHandler =
+                new ConfigScreenInputHandler();
     }
 
     public ConfigScreenState state() {
-        return state;
+        return editor.state();
     }
 
     @Override
@@ -84,6 +103,7 @@ public final class ConfigScreen extends Screen {
         );
 
         updateLayout();
+        renderer = new ConfigScreenRenderer(font);
 
         listInputBox = new EditBox(
                 font,
@@ -111,9 +131,27 @@ public final class ConfigScreen extends Screen {
 
         updateLayout();
 
-        drawBackground(graphics);
-        drawHeader(graphics);
-        drawNavigationPanel(graphics);
+        renderer.drawBackground(
+                graphics,
+                width,
+                height
+        );
+
+        renderer.drawHeader(
+                graphics,
+                title,
+                width
+        );
+
+        renderer.drawNavigationPanel(
+                graphics,
+                editor.state(),
+                navigationLeft,
+                navigationTop,
+                navigationRight,
+                navigationBottom
+        );
+
         drawContentPanel(graphics);
     }
 
@@ -163,72 +201,6 @@ public final class ConfigScreen extends Screen {
         );
     }
 
-    private void drawNavigationPanel(
-            GuiGraphicsExtractor graphics
-    ) {
-        graphics.fill(
-                navigationLeft,
-                navigationTop,
-                navigationRight,
-                navigationBottom,
-                0xFF191C21
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Categories"),
-                navigationLeft + 10,
-                navigationTop + 10,
-                0xFFE6E8EB,
-                false
-        );
-
-        int rowTop = navigationTop + 32;
-
-        for (var category : state.categoryTree().visibleNodes()) {
-            drawCategoryRow(graphics, category, rowTop);
-            rowTop += CATEGORY_ROW_HEIGHT;
-        }
-    }
-
-    private void drawOptionMenu(
-            GuiGraphicsExtractor graphics
-    ) {
-        if (optionMenu == null
-                || !optionMenu.open()) {
-            return;
-        }
-
-        int left = contentRight - 150;
-        int top = contentTop + 72;
-
-        graphics.fill(
-                left,
-                top,
-                left + 130,
-                top + 48,
-                0xFF30343B
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Reset"),
-                left + 10,
-                top + 8,
-                0xFFFFFFFF,
-                false
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Close"),
-                left + 10,
-                top + 28,
-                0xFFFFFFFF,
-                false
-        );
-    }
-
     private boolean handleOptionMenuClick(
             double mouseX,
             double mouseY
@@ -250,11 +222,11 @@ public final class ConfigScreen extends Screen {
         }
 
         if (mouseY < top + 24) {
-            optionMenu.perform(
-                    OptionMenu.Action.RESET
+            editor.reset(
+                    optionMenu.option()
             );
 
-            state.markDirty();
+            optionMenu.hide();
             return true;
         }
 
@@ -268,37 +240,28 @@ public final class ConfigScreen extends Screen {
     private void drawContentPanel(
             GuiGraphicsExtractor graphics
     ) {
-        graphics.fill(
+        renderer.drawContentPanelHeader(
+                graphics,
+                editor.state(),
                 contentLeft,
                 contentTop,
                 contentRight,
-                contentBottom,
-                0xFF191C21
+                contentBottom
         );
 
-        Component selectedTitle = state.selectedCategory() == null
-                ? Component.literal("Select a category")
-                : Component.literal(
-                state.selectedCategory().title()
-        );
-
-        graphics.text(
-                font,
-                selectedTitle,
-                contentLeft + 12,
-                contentTop + 12,
-                0xFFFFFFFF,
-                false
-        );
-
-        if (state.selectedCategory() == null) {
-            drawSaveButton(graphics);
+        if (editor.selectedCategory() == null) {
+            renderer.drawSaveButton(
+                    graphics,
+                    editor.state(),
+                    contentRight,
+                    contentBottom
+            );
             return;
         }
 
         int optionTop = contentTop + 42;
 
-        for (var option : state.selectedCategory().options()) {
+        for (var option : editor.selectedCategory().options()) {
             drawOptionRow(
                     graphics,
                     option,
@@ -308,16 +271,32 @@ public final class ConfigScreen extends Screen {
             optionTop += OPTION_ROW_HEIGHT;
         }
 
-        drawSaveButton(graphics);
-        drawOptionMenu(graphics);
-        drawCloseWarning(graphics);
+        renderer.drawSaveButton(
+                graphics,
+                editor.state(),
+                contentRight,
+                contentBottom
+        );
+
+        renderer.drawOptionMenu(
+                graphics,
+                optionMenu,
+                contentRight,
+                contentTop
+        );
+        renderer.drawCloseWarning(
+                graphics,
+                editor.state(),
+                width,
+                height
+        );
     }
 
     private boolean handleCloseWarningClick(
             double mouseX,
             double mouseY
     ) {
-        if (!state.closeWarningOpen()) {
+        if (!editor.closeWarningOpen()) {
             return false;
         }
 
@@ -334,50 +313,26 @@ public final class ConfigScreen extends Screen {
         if (mouseY >= top + 32
                 && mouseY < top + 56) {
             saveConfiguration();
-            state.closeCloseWarning();
+            editor.closeCloseWarning();
             super.onClose();
             return true;
         }
 
         if (mouseY >= top + 56
                 && mouseY < top + 78) {
-            state.markClean();
-            state.closeCloseWarning();
+            editor.markClean();
+            editor.closeCloseWarning();
             super.onClose();
             return true;
         }
 
         if (mouseY >= top + 78
                 && mouseY < top + 104) {
-            state.closeCloseWarning();
+            editor.closeCloseWarning();
             return true;
         }
 
         return true;
-    }
-
-    private void drawSaveButton(
-            GuiGraphicsExtractor graphics
-    ) {
-        int left = contentRight - SAVE_BUTTON_WIDTH - 12;
-        int top = contentBottom - SAVE_BUTTON_HEIGHT - 12;
-
-        graphics.fill(
-                left,
-                top,
-                left + SAVE_BUTTON_WIDTH,
-                top + SAVE_BUTTON_HEIGHT,
-                state.dirty() ? 0xFF3E7A52 : 0xFF454A52
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Save"),
-                left + 16,
-                top + 6,
-                0xFFFFFFFF,
-                false
-        );
     }
 
     private void drawOptionRow(
@@ -385,39 +340,23 @@ public final class ConfigScreen extends Screen {
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
-        graphics.fill(
-                contentLeft + 8,
-                rowTop - 4,
-                contentRight - 8,
-                rowTop + OPTION_ROW_HEIGHT - 4,
-                0xFF22262D
+        renderer.drawOptionRowHeader(
+                graphics,
+                option,
+                contentLeft,
+                contentRight,
+                rowTop,
+                OPTION_ROW_HEIGHT
         );
-
-        graphics.text(
-                font,
-                Component.literal(option.name()),
-                contentLeft + 18,
-                rowTop + 2,
-                0xFFFFFFFF,
-                false
-        );
-
-        if (!option.description().isBlank()) {
-            graphics.text(
-                    font,
-                    Component.literal(option.description()),
-                    contentLeft + 18,
-                    rowTop + 16,
-                    0xFFB8BEC8,
-                    false
-            );
-        }
 
         if (isBooleanOption(option)) {
-            drawBooleanControl(
+            renderer.drawBooleanControl(
                     graphics,
-                    option,
-                    rowTop
+                    readBoolean(option),
+                    contentRight,
+                    rowTop,
+                    OPTION_CONTROL_WIDTH,
+                    OPTION_CONTROL_HEIGHT
             );
         } else if (isStringListOption(option)) {
             drawListControls(
@@ -426,83 +365,34 @@ public final class ConfigScreen extends Screen {
                     rowTop
             );
         } else if (isNumericOption(option)) {
-            drawNumericControl(
+            NumericOption numeric =
+                    new NumericOption(option);
+
+            renderer.drawNumericControl(
                     graphics,
-                    option,
-                    rowTop
+                    numeric.value(),
+                    contentRight,
+                    rowTop,
+                    OPTION_CONTROL_HEIGHT
             );
         } else if (isStringOption(option)) {
-            drawStringControl(
+            StringOption string =
+                    new StringOption(option);
+
+            renderer.drawStringControl(
                     graphics,
-                    option,
-                    rowTop
+                    string.value(),
+                    contentRight,
+                    rowTop,
+                    OPTION_CONTROL_HEIGHT
             );
         }
 
-        drawMoreButton(
+        renderer.drawMoreButton(
                 graphics,
-                rowTop
-        );
-    }
-
-    private void drawCategoryRow(
-            GuiGraphicsExtractor graphics,
-            dev.vellum.client.navigation.CategoryNode category,
-            int rowTop
-    ) {
-        boolean selected =
-                state.selectedCategory() == category;
-
-        if (selected) {
-            graphics.fill(
-                    navigationLeft + 4,
-                    rowTop - 3,
-                    navigationRight - 4,
-                    rowTop + CATEGORY_ROW_HEIGHT - 3,
-                    0xFF303640
-            );
-        }
-
-        int left = navigationLeft
-                + CATEGORY_TEXT_PADDING
-                + category.depth() * CATEGORY_INDENT;
-
-        String indicator = category.hasChildren()
-                ? category.expanded() ? "▾ " : "▸ "
-                : "  ";
-
-        graphics.text(
-                font,
-                Component.literal(indicator + category.title()),
-                left,
+                contentRight,
                 rowTop,
-                selected ? 0xFFFFFFFF : 0xFFD0D4DA,
-                false
-        );
-    }
-
-    private void drawMoreButton(
-            GuiGraphicsExtractor graphics,
-            int rowTop
-    ) {
-        int left = contentRight - 84;
-        int top = rowTop + 3;
-
-        graphics.fill(
-                left,
-                top,
-                left + 52,
-                top + OPTION_CONTROL_HEIGHT,
-                0xFF454A52
-        );
-
-        graphics.text(
-                font,
-                Component.literal("More"),
-                left + 8,
-                top + 6,
-                0xFFFFFFFF,
-                false
+                OPTION_CONTROL_HEIGHT
         );
     }
 
@@ -518,13 +408,19 @@ public final class ConfigScreen extends Screen {
             return super.mouseClicked(click, doubled);
         }
 
-        if (isInsideNavigation(mouseX, mouseY)) {
-            return handleNavigationClick(
-                    mouseX,
-                    mouseY,
-                    click,
-                    doubled
-            );
+        if (inputHandler.handleNavigationClick(
+                mouseX,
+                mouseY,
+                editor,
+                navigationLeft,
+                navigationTop,
+                navigationRight,
+                navigationBottom,
+                CATEGORY_ROW_HEIGHT,
+                CATEGORY_TEXT_PADDING,
+                CATEGORY_INDENT
+        )) {
+            return true;
         }
 
         if (isInsideContent(mouseX, mouseY)) {
@@ -539,133 +435,42 @@ public final class ConfigScreen extends Screen {
         return super.mouseClicked(click, doubled);
     }
 
-    private boolean handleNavigationClick(
-            double mouseX,
-            double mouseY,
-            MouseButtonEvent click,
-            boolean doubled
-    ) {
-        int rowTop = navigationTop + 32;
-
-        for (var category : state.categoryTree().visibleNodes()) {
-            int rowBottom = rowTop + CATEGORY_ROW_HEIGHT;
-
-            if (mouseY >= rowTop && mouseY < rowBottom) {
-                int categoryLeft = navigationLeft
-                        + CATEGORY_TEXT_PADDING
-                        + category.depth() * CATEGORY_INDENT;
-
-                boolean clickedIndicator =
-                        category.hasChildren()
-                                && mouseX >= categoryLeft
-                                && mouseX < categoryLeft + 16;
-
-                if (clickedIndicator) {
-                    state.toggle(category);
-                    return true;
-                }
-
-                state.select(category);
-                return true;
-            }
-
-            rowTop += CATEGORY_ROW_HEIGHT;
-        }
-
-        return super.mouseClicked(click, doubled);
-    }
-
     @Override
     public void onClose() {
-        if (state.dirty()) {
-            state.openCloseWarning();
+        if (editor.dirty()) {
+            editor.openCloseWarning();
             return;
         }
 
         super.onClose();
     }
 
-    private void drawCloseWarning(
-            GuiGraphicsExtractor graphics
-    ) {
-        if (!state.closeWarningOpen()) {
-            return;
-        }
-
-        int left = width / 2 - 140;
-        int top = height / 2 - 55;
-
-        graphics.fill(
-                0,
-                0,
-                width,
-                height,
-                0x99000000
-        );
-
-        graphics.fill(
-                left,
-                top,
-                left + 280,
-                top + 110,
-                0xFF30343B
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Unsaved changes"),
-                left + 20,
-                top + 16,
-                0xFFFFFFFF,
-                false
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Save and close"),
-                left + 20,
-                top + 42,
-                0xFFFFFFFF,
-                false
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Discard"),
-                left + 20,
-                top + 62,
-                0xFFFFFFFF,
-                false
-        );
-
-        graphics.text(
-                font,
-                Component.literal("Cancel"),
-                left + 20,
-                top + 82,
-                0xFFFFFFFF,
-                false
-        );
-    }
-
     private boolean isInsideNavigation(
             double mouseX,
             double mouseY
     ) {
-        return mouseX >= navigationLeft
-                && mouseX < navigationRight
-                && mouseY >= navigationTop
-                && mouseY < navigationBottom;
+        return inputHandler.isInsideNavigation(
+                mouseX,
+                mouseY,
+                navigationLeft,
+                navigationTop,
+                navigationRight,
+                navigationBottom
+        );
     }
 
     private boolean isInsideContent(
             double mouseX,
             double mouseY
     ) {
-        return mouseX >= contentLeft
-                && mouseX < contentRight
-                && mouseY >= contentTop
-                && mouseY < contentBottom;
+        return inputHandler.isInsideContent(
+                mouseX,
+                mouseY,
+                contentLeft,
+                contentTop,
+                contentRight,
+                contentBottom
+        );
     }
 
     private boolean handleContentClick(
@@ -687,13 +492,13 @@ public final class ConfigScreen extends Screen {
             return true;
         }
 
-        if (state.selectedCategory() == null) {
+        if (editor.selectedCategory() == null) {
             return super.mouseClicked(click, doubled);
         }
 
         int rowTop = contentTop + 42;
 
-        for (var option : state.selectedCategory().options()) {
+        for (var option : editor.selectedCategory().options()) {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouseY >= rowTop && mouseY < rowBottom) {
@@ -707,33 +512,54 @@ public final class ConfigScreen extends Screen {
                     NumericOption numeric = new NumericOption(option);
                     if (isInsideNumericMinus(mouseX, mouseY, rowTop)) {
                         numeric.decrement();
-                        state.markDirty();
+                        editor.markDirty();
                         return true;
                     }
                     if (isInsideNumericPlus(mouseX, mouseY, rowTop)) {
                         numeric.increment();
-                        state.markDirty();
+                        editor.markDirty();
                         return true;
                     }
                 }
 
-                if (isStringOption(option)
-                        && isInsideStringControl(mouseX, mouseY, rowTop)) {
-                    beginStringEdit(option, rowTop);
+                if (handleStringClick(
+                        mouseX,
+                        mouseY,
+                        option,
+                        rowTop
+                )) {
                     return true;
                 }
 
                 if (isStringListOption(option)) {
-                    StringListOption list = new StringListOption(option);
-                    int listTop = rowTop + LIST_ROW_TOP_OFFSET;
-                    int index = (int) ((mouseY - listTop) / LIST_ROW_HEIGHT);
+                    StringListOption list =
+                            new StringListOption(option);
 
-                    if (index >= 0
-                            && index < list.values().size()
-                            && mouseX >= contentLeft + 18
-                            && mouseX < contentRight - 150) {
-                        state.selectListItem(option, index);
-                        state.beginListDrag(option, index);
+                    int listTop =
+                            rowTop + LIST_ROW_TOP_OFFSET;
+
+                    int index =
+                            inputHandler.listItemIndex(
+                                    mouseX,
+                                    mouseY,
+                                    contentLeft,
+                                    contentRight,
+                                    listTop,
+                                    LIST_ROW_HEIGHT,
+                                    list.values().size()
+                            );
+
+                    if (index >= 0) {
+                        editor.selectListItem(
+                                option,
+                                index
+                        );
+
+                        editor.beginListDrag(
+                                option,
+                                index
+                        );
+
                         return true;
                     }
                 }
@@ -780,13 +606,14 @@ public final class ConfigScreen extends Screen {
             double mouseX,
             double mouseY
     ) {
-        int left = contentRight - SAVE_BUTTON_WIDTH - 12;
-        int top = contentBottom - SAVE_BUTTON_HEIGHT - 12;
-
-        return mouseX >= left
-                && mouseX < left + SAVE_BUTTON_WIDTH
-                && mouseY >= top
-                && mouseY < top + SAVE_BUTTON_HEIGHT;
+        return inputHandler.isInsideSaveButton(
+                mouseX,
+                mouseY,
+                contentRight,
+                contentBottom,
+                SAVE_BUTTON_WIDTH,
+                SAVE_BUTTON_HEIGHT
+        );
     }
 
     private boolean isInsideMoreButton(
@@ -794,23 +621,18 @@ public final class ConfigScreen extends Screen {
             double mouseY,
             int rowTop
     ) {
-        int left = contentRight - 84;
-        int top = rowTop + 3;
-
-        return mouseX >= left
-                && mouseX < left + 52
-                && mouseY >= top
-                && mouseY < top + OPTION_CONTROL_HEIGHT;
+        return inputHandler.isInsideMoreButton(
+                mouseX,
+                mouseY,
+                contentRight,
+                rowTop,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
     private void saveConfiguration() {
-        if (!state.dirty()) {
-            return;
-        }
-
         try {
-            configManager.save();
-            state.markClean();
+            editor.save();
         } catch (IOException exception) {
             throw new IllegalStateException(
                     "Unable to save Vellum configuration",
@@ -823,33 +645,32 @@ public final class ConfigScreen extends Screen {
             double mouseX,
             int rowTop
     ) {
-        int removeLeft = contentRight - 72;
-        int addLeft = removeLeft - 60;
-        int buttonTop = rowTop + 3;
-
-        return mouseX >= addLeft
-                && mouseX < addLeft + 52
-                && buttonTop <= rowTop + OPTION_ROW_HEIGHT
-                && rowTop <= buttonTop + OPTION_CONTROL_HEIGHT;
+        return inputHandler.isInsideAddButton(
+                mouseX,
+                contentRight,
+                rowTop,
+                OPTION_ROW_HEIGHT,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
     private boolean isInsideRemoveButton(
             double mouseX,
             int rowTop
     ) {
-        int removeLeft = contentRight - 72;
-        int buttonTop = rowTop + 3;
-
-        return mouseX >= removeLeft
-                && mouseX < removeLeft + 64
-                && buttonTop <= rowTop + OPTION_ROW_HEIGHT
-                && rowTop <= buttonTop + OPTION_CONTROL_HEIGHT;
+        return inputHandler.isInsideRemoveButton(
+                mouseX,
+                contentRight,
+                rowTop,
+                OPTION_ROW_HEIGHT,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
     private void addListValue(
             ConfigOptionHandle<?> option
     ) {
-        state.openListInput(option);
+        editor.openListInput(option);
 
         listInputBox.setValue("");
         listInputBox.setVisible(true);
@@ -864,7 +685,7 @@ public final class ConfigScreen extends Screen {
         }
 
         ConfigOptionHandle<?> option =
-                state.listInputOption();
+                editor.listInputOption();
 
         if (option == null) {
             return;
@@ -874,15 +695,15 @@ public final class ConfigScreen extends Screen {
                 new StringListOption(option);
 
         list.add(value);
-        state.markDirty();
+        editor.markDirty();
 
-        state.closeListInput();
+        editor.closeListInput();
         listInputBox.setValue("");
         listInputBox.setVisible(false);
     }
 
     private void cancelListInput() {
-        state.closeListInput();
+        editor.closeListInput();
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
@@ -894,7 +715,7 @@ public final class ConfigScreen extends Screen {
     ) {
         int keyCode = event.key();
 
-        if (state.editingStringOption() != null) {
+        if (editor.editingStringOption() != null) {
             if (keyCode == 257) {
                 confirmStringEdit();
                 return true;
@@ -906,7 +727,7 @@ public final class ConfigScreen extends Screen {
             }
         }
 
-        if (state.listInputOpen()) {
+        if (editor.listInputOpen()) {
             if (keyCode == 257) {
                 confirmListInput();
                 return true;
@@ -924,7 +745,7 @@ public final class ConfigScreen extends Screen {
     private void removeListValue(
             ConfigOptionHandle<?> option
     ) {
-        if (state.selectedListOption() != option) {
+        if (editor.selectedListOption() != option) {
             return;
         }
 
@@ -932,11 +753,11 @@ public final class ConfigScreen extends Screen {
                 new StringListOption(option);
 
         list.remove(
-                state.selectedListIndex()
+                editor.selectedListIndex()
         );
 
-        state.clearListSelection();
-        state.markDirty();
+        editor.clearListSelection();
+        editor.markDirty();
     }
 
     private boolean isInsideBooleanControl(
@@ -988,46 +809,46 @@ public final class ConfigScreen extends Screen {
         return option.valueType() == String.class;
     }
 
-    private void drawNumericControl(GuiGraphicsExtractor graphics, ConfigOptionHandle<?> option, int rowTop) {
-        NumericOption numeric = new NumericOption(option);
-        int top = rowTop + 3;
-        int plusLeft = contentRight - 38;
-        int minusLeft = plusLeft - 24;
-
-        graphics.fill(minusLeft, top, minusLeft + 20, top + OPTION_CONTROL_HEIGHT, 0xFF454A52);
-        graphics.text(font, Component.literal("-"), minusLeft + 7, top + 5, 0xFFFFFFFF, false);
-        graphics.text(font, Component.literal(numeric.value().toString()), minusLeft - 42, top + 5, 0xFFFFFFFF, false);
-        graphics.fill(plusLeft, top, plusLeft + 20, top + OPTION_CONTROL_HEIGHT, 0xFF3E7A52);
-        graphics.text(font, Component.literal("+"), plusLeft + 7, top + 5, 0xFFFFFFFF, false);
+    private boolean isInsideNumericMinus(
+            double mouseX,
+            double mouseY,
+            int rowTop
+    ) {
+        return inputHandler.isInsideNumericMinus(
+                mouseX,
+                mouseY,
+                contentRight,
+                rowTop,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
-    private void drawStringControl(GuiGraphicsExtractor graphics, ConfigOptionHandle<?> option, int rowTop) {
-        StringOption string = new StringOption(option);
-        int left = contentRight - 210;
-        int top = rowTop + 3;
-        graphics.fill(left, top, contentRight - 18, top + OPTION_CONTROL_HEIGHT, 0xFF2A2E35);
-        graphics.text(font, Component.literal(string.value()), left + 8, top + 5, 0xFFFFFFFF, false);
+    private boolean isInsideNumericPlus(
+            double mouseX,
+            double mouseY,
+            int rowTop
+    ) {
+        return inputHandler.isInsideNumericPlus(
+                mouseX,
+                mouseY,
+                contentRight,
+                rowTop,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
-    private boolean isInsideNumericMinus(double mouseX, double mouseY, int rowTop) {
-        int left = contentRight - 62;
-        return mouseX >= left && mouseX < left + 20
-                && mouseY >= rowTop + 3
-                && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
-    }
-
-    private boolean isInsideNumericPlus(double mouseX, double mouseY, int rowTop) {
-        int left = contentRight - 38;
-        return mouseX >= left && mouseX < left + 20
-                && mouseY >= rowTop + 3
-                && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
-    }
-
-    private boolean isInsideStringControl(double mouseX, double mouseY, int rowTop) {
-        int left = contentRight - 210;
-        return mouseX >= left && mouseX < contentRight - 18
-                && mouseY >= rowTop + 3
-                && mouseY < rowTop + 3 + OPTION_CONTROL_HEIGHT;
+    private boolean isInsideStringControl(
+            double mouseX,
+            double mouseY,
+            int rowTop
+    ) {
+        return inputHandler.isInsideStringControl(
+                mouseX,
+                mouseY,
+                contentRight,
+                rowTop,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
     private void beginStringEdit(
@@ -1037,7 +858,7 @@ public final class ConfigScreen extends Screen {
         StringOption string =
                 new StringOption(option);
 
-        state.beginStringEdit(option);
+        editor.beginStringEdit(option);
 
         listInputBox.setValue(string.value());
         listInputBox.setY(rowTop + 3);
@@ -1047,7 +868,7 @@ public final class ConfigScreen extends Screen {
 
     private void confirmStringEdit() {
         ConfigOptionHandle<?> option =
-                state.editingStringOption();
+                editor.editingStringOption();
 
         if (option == null) {
             return;
@@ -1057,15 +878,15 @@ public final class ConfigScreen extends Screen {
                 new StringOption(option);
 
         string.setValue(listInputBox.getValue());
-        state.markDirty();
-        state.endStringEdit();
+        editor.markDirty();
+        editor.endStringEdit();
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
     }
 
     private void cancelStringEdit() {
-        state.endStringEdit();
+        editor.endStringEdit();
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
@@ -1080,73 +901,28 @@ public final class ConfigScreen extends Screen {
                 || type == Boolean.class;
     }
 
-    private void drawBooleanControl(
-            GuiGraphicsExtractor graphics,
-            ConfigOptionHandle<?> option,
-            int rowTop
-    ) {
-        boolean enabled = readBoolean(option);
-
-        int left = contentRight
-                - OPTION_CONTROL_WIDTH
-                - 18;
-
-        int top = rowTop + 3;
-
-        graphics.fill(
-                left,
-                top,
-                left + OPTION_CONTROL_WIDTH,
-                top + OPTION_CONTROL_HEIGHT,
-                enabled
-                        ? 0xFF3E7A52
-                        : 0xFF454A52
-        );
-
-        graphics.text(
-                font,
-                Component.literal(enabled ? "ON" : "OFF"),
-                left + 13,
-                top + 6,
-                0xFFFFFFFF,
-                false
-        );
-    }
-
     private void drawListControls(
             GuiGraphicsExtractor graphics,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
-        StringListOption list = new StringListOption(option);
-        int listTop = rowTop + LIST_ROW_TOP_OFFSET;
-        int index = 0;
+        StringListOption list =
+                new StringListOption(option);
 
-        for (String value : list.values()) {
-            int itemTop = listTop + index * LIST_ROW_HEIGHT;
-            boolean selected = state.selectedListOption() == option
-                    && state.selectedListIndex() == index;
-
-            graphics.fill(
-                    contentLeft + 18,
-                    itemTop,
-                    contentRight - 150,
-                    itemTop + LIST_ROW_HEIGHT - 2,
-                    selected ? 0xFF3E596F : 0xFF2A2E35
-            );
-
-            graphics.text(
-                    font,
-                    Component.literal(value),
-                    contentLeft + 26,
-                    itemTop + 4,
-                    0xFFFFFFFF,
-                    false
-            );
-            index++;
-        }
-
-        drawListButtons(graphics, rowTop);
+        renderer.drawListControls(
+                graphics,
+                list.values(),
+                editor.selectedListOption() == option
+                        ? editor.selectedListIndex()
+                        : -1,
+                editor.selectedListOption() == option,
+                contentLeft,
+                contentRight,
+                rowTop,
+                LIST_ROW_TOP_OFFSET,
+                LIST_ROW_HEIGHT,
+                OPTION_CONTROL_HEIGHT
+        );
     }
 
     private void drawListButtons(
@@ -1183,11 +959,11 @@ public final class ConfigScreen extends Screen {
                 (ConfigOptionHandle<Boolean>) option;
 
         booleanOption.set(!readBoolean(option));
-        state.markDirty();
+        editor.markDirty();
     }
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (!state.draggingListItem()) return super.mouseDragged(event, deltaX, deltaY);
+        if (!editor.draggingListItem()) return super.mouseDragged(event, deltaX, deltaY);
         return true;
     }
 
@@ -1195,19 +971,19 @@ public final class ConfigScreen extends Screen {
     public boolean mouseReleased(
             MouseButtonEvent event
     ) {
-        if (!state.draggingListItem()) {
+        if (!editor.draggingListItem()) {
             return super.mouseReleased(event);
         }
 
         ConfigOptionHandle<?> option =
-                state.draggingListOption();
+                editor.draggingListOption();
 
         if (option != null
-                && state.selectedCategory() != null) {
+                && editor.selectedCategory() != null) {
             int rowTop = contentTop + 42;
 
             for (var currentOption
-                    : state.selectedCategory().options()) {
+                    : editor.selectedCategory().options()) {
                 if (currentOption == option) {
                     int target =
                             (int) (
@@ -1223,16 +999,16 @@ public final class ConfigScreen extends Screen {
                     if (target >= 0
                             && target < list.values().size()) {
                         list.move(
-                                state.draggingListIndex(),
+                                editor.draggingListIndex(),
                                 target
                         );
 
-                        state.selectListItem(
+                        editor.selectListItem(
                                 option,
                                 target
                         );
 
-                        state.markDirty();
+                        editor.markDirty();
                     }
 
                     break;
@@ -1242,8 +1018,169 @@ public final class ConfigScreen extends Screen {
             }
         }
 
-        state.endListDrag();
+        editor.endListDrag();
         return true;
     }
 
+    private boolean handleSaveClick(
+            double mouseX,
+            double mouseY
+    ) {
+        if (!isInsideSaveButton(mouseX, mouseY)) {
+            return false;
+        }
+
+        saveConfiguration();
+        return true;
+    }
+
+    private boolean handleMoreClick(
+            double mouseX,
+            double mouseY,
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        if (!isInsideMoreButton(
+                mouseX,
+                mouseY,
+                rowTop
+        )) {
+            return false;
+        }
+
+        optionMenu =
+                new OptionMenu(option);
+
+        optionMenu.show();
+        return true;
+    }
+
+    private boolean handleNumericClick(
+            double mouseX,
+            double mouseY,
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        if (!isNumericOption(option)) {
+            return false;
+        }
+
+        NumericOption numeric =
+                new NumericOption(option);
+
+        if (isInsideNumericMinus(
+                mouseX,
+                mouseY,
+                rowTop
+        )) {
+            numeric.decrement();
+            editor.markDirty();
+            return true;
+        }
+
+        if (isInsideNumericPlus(
+                mouseX,
+                mouseY,
+                rowTop
+        )) {
+            numeric.increment();
+            editor.markDirty();
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean handleListClick(
+            double mouseX,
+            double mouseY,
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        if (!isStringListOption(option)) {
+            return false;
+        }
+
+        StringListOption list =
+                new StringListOption(option);
+
+        int listTop =
+                rowTop + LIST_ROW_TOP_OFFSET;
+
+        int index =
+                inputHandler.listItemIndex(
+                        mouseX,
+                        mouseY,
+                        contentLeft,
+                        contentRight,
+                        listTop,
+                        LIST_ROW_HEIGHT,
+                        list.values().size()
+                );
+
+        if (index >= 0) {
+            editor.selectListItem(
+                    option,
+                    index
+            );
+
+            editor.beginListDrag(
+                    option,
+                    index
+            );
+
+            return true;
+        }
+
+        if (isInsideAddButton(
+                mouseX,
+                rowTop
+        )) {
+            addListValue(option);
+            return true;
+        }
+
+        if (isInsideRemoveButton(
+                mouseX,
+                rowTop
+        )) {
+            removeListValue(option);
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean handleStringClick(
+            double mouseX,
+            double mouseY,
+            ConfigOptionHandle<?> option,
+            int rowTop
+    ) {
+        if (!isStringOption(option)) {
+            return false;
+        }
+
+        if (!isInsideStringControl(
+                mouseX,
+                mouseY,
+                rowTop
+        )) {
+            return false;
+        }
+
+        beginStringEdit(
+                option,
+                rowTop
+        );
+
+        return true;
+    }
+
+    @Override
+    protected void beforeScreenClose() {
+        if (editor.dirty()) {
+            editor.openCloseWarning();
+        }
+    }
 }

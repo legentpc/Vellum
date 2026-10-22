@@ -37,12 +37,7 @@ public final class OptionMenu {
         open = !open;
     }
 
-    public void reset() {
-        hide();
-    }
-
     public enum Action {
-        RESET,
         CLOSE
     }
 
@@ -52,9 +47,8 @@ public final class OptionMenu {
                 "action"
         );
 
-        switch (action) {
-            case RESET -> reset();
-            case CLOSE -> hide();
+        if (action == Action.CLOSE) {
+            hide();
         }
     }
 }

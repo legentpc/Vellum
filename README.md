@@ -1,2 +1,2 @@
 # Vellum
-A lightweight, annotation-driven configuration &amp; GUI library for Fabric mods.
+A library for creating configuration GUIs in Minecraft.

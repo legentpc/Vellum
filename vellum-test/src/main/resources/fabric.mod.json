@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "vellum-test",
+  "version": "${version}",
+  "name": "Vellum Test",
+  "description": "Development test mod for Vellum.",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.vellum.test.VellumTestClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": ">=26.1 <26.2",
+    "fabric-api": "*",
+    "vellumconfig": "*"
+  }
+}

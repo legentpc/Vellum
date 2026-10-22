@@ -5,20 +5,25 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
 import dev.vellum.config.annotation.ConfigOption;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 public final class ConfigManager<T extends Config> {
     private final T config;
@@ -89,17 +94,46 @@ public final class ConfigManager<T extends Config> {
         JsonObject values = new JsonObject();
 
         for (ConfigOptionHandle<?> option : allOptions()) {
-            values.add(option.name(), gson.toJsonTree(option.get()));
+            values.add(
+                    option.name(),
+                    gson.toJsonTree(option.get())
+            );
         }
 
-        try (Writer writer = Files.newBufferedWriter(file)) {
+        Path temporaryFile =
+                file.resolveSibling(
+                        file.getFileName() + ".tmp"
+                );
+
+        try (Writer writer =
+                     Files.newBufferedWriter(temporaryFile)) {
             gson.toJson(values, writer);
+        }
+
+        try {
+            Files.move(
+                    temporaryFile,
+                    file,
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE
+            );
+        } catch (AtomicMoveNotSupportedException exception) {
+            Files.move(
+                    temporaryFile,
+                    file,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
         }
     }
 
-    private Map<String, List<ConfigOptionHandle<?>>> scanOptions(T config) {
+    private Map<String, List<ConfigOptionHandle<?>>> scanOptions(
+            T config
+    ) {
         Map<String, List<ConfigOptionHandle<?>>> result =
                 new LinkedHashMap<>();
+
+        Set<String> optionNames =
+                new HashSet<>();
 
         for (Class<?> type = config.getClass();
              type != null && type != Object.class;
@@ -111,6 +145,13 @@ public final class ConfigManager<T extends Config> {
 
                 if (metadata == null) {
                     continue;
+                }
+
+                if (!optionNames.add(metadata.name())) {
+                    throw new IllegalArgumentException(
+                            "Duplicate config option name: "
+                                    + metadata.name()
+                    );
                 }
 
                 ConfigOptionHandle<?> handle =
@@ -168,7 +209,13 @@ public final class ConfigManager<T extends Config> {
         } else if (type == String.class) {
             set(option, value.getAsString());
         } else {
-            set(option, gson.fromJson(value, type));
+            set(
+                    option,
+                    gson.fromJson(
+                            value,
+                            option.genericType()
+                    )
+            );
         }
     }
 
