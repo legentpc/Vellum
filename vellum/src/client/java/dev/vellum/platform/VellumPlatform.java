@@ -83,4 +83,14 @@ public final class VellumPlatform {
 
         return resources;
     }
+
+    public static boolean resourceExists(
+            String namespace,
+            String path
+    ) {
+        return resources().exists(
+                namespace,
+                path
+        );
+    }
 }

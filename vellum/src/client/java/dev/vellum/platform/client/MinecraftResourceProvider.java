@@ -45,4 +45,21 @@ public final class MinecraftResourceProvider
                 )
                 .open();
     }
+
+    @Override
+    public boolean exists(
+            String namespace,
+            String path
+    ) {
+        Identifier identifier =
+                Identifier.fromNamespaceAndPath(
+                        namespace,
+                        path
+                );
+
+        return minecraft
+                .getResourceManager()
+                .getResource(identifier)
+                .isPresent();
+    }
 }

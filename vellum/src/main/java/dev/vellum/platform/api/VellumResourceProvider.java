@@ -8,4 +8,9 @@ public interface VellumResourceProvider {
             String namespace,
             String path
     ) throws IOException;
+
+    boolean exists(
+            String namespace,
+            String path
+    );
 }
