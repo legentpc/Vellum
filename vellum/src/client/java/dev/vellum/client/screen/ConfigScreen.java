@@ -62,6 +62,7 @@ public final class ConfigScreen
     private EditBox listInputBox;
     private OptionMenu optionMenu;
     private ConfigScreenRenderer renderer;
+    private VellumRenderContext renderContext;
 
     public ConfigScreen(
             VellumConfigEditor editor,
@@ -120,7 +121,7 @@ public final class ConfigScreen
 
         updateLayout();
 
-        VellumRenderContext renderContext =
+        renderContext =
                 new MinecraftRenderContext(
                         graphics,
                         font,
@@ -139,7 +140,7 @@ public final class ConfigScreen
         );
 
         renderer.drawNavigationPanel(
-                graphics,
+                renderContext,
                 editor,
                 navigationLeft,
                 navigationTop,
@@ -236,7 +237,7 @@ public final class ConfigScreen
             GuiGraphicsExtractor graphics
     ) {
         renderer.drawContentPanelHeader(
-                graphics,
+                renderContext,
                 editor,
                 contentLeft,
                 contentTop,
@@ -246,7 +247,7 @@ public final class ConfigScreen
 
         if (editor.selectedCategory() == null) {
             renderer.drawSaveButton(
-                    graphics,
+                    renderContext,
                     editor,
                     contentRight,
                     contentBottom
@@ -267,20 +268,20 @@ public final class ConfigScreen
         }
 
         renderer.drawSaveButton(
-                graphics,
+                renderContext,
                 editor,
                 contentRight,
                 contentBottom
         );
 
         renderer.drawOptionMenu(
-                graphics,
+                renderContext,
                 optionMenu,
                 contentRight,
                 contentTop
         );
         renderer.drawCloseWarning(
-                graphics,
+                renderContext,
                 editor,
                 width,
                 height
@@ -336,7 +337,7 @@ public final class ConfigScreen
             int rowTop
     ) {
         renderer.drawOptionRowHeader(
-                graphics,
+                renderContext,
                 option,
                 contentLeft,
                 contentRight,
@@ -346,7 +347,7 @@ public final class ConfigScreen
 
         if (isBooleanOption(option)) {
             renderer.drawBooleanControl(
-                    graphics,
+                    renderContext,
                     readBoolean(option),
                     contentRight,
                     rowTop,
@@ -364,7 +365,7 @@ public final class ConfigScreen
                     new NumericOption(option);
 
             renderer.drawNumericControl(
-                    graphics,
+                    renderContext,
                     numeric.value(),
                     contentRight,
                     rowTop,
@@ -375,7 +376,7 @@ public final class ConfigScreen
                     new StringOption(option);
 
             renderer.drawStringControl(
-                    graphics,
+                    renderContext,
                     string.value(),
                     contentRight,
                     rowTop,
@@ -384,7 +385,7 @@ public final class ConfigScreen
         }
 
         renderer.drawMoreButton(
-                graphics,
+                renderContext,
                 contentRight,
                 rowTop,
                 OPTION_CONTROL_HEIGHT
@@ -905,7 +906,7 @@ public final class ConfigScreen
                 new StringListOption(option);
 
         renderer.drawListControls(
-                graphics,
+                renderContext,
                 list.values(),
                 editor.selectedListOption() == option
                         ? editor.selectedListIndex()

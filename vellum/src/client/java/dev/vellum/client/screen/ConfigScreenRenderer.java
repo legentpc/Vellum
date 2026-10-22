@@ -7,7 +7,6 @@ import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -62,14 +61,14 @@ public final class ConfigScreenRenderer {
     }
 
     public void drawNavigationPanel(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             VellumConfigEditor editor,
             int navigationLeft,
             int navigationTop,
             int navigationRight,
             int navigationBottom
     ) {
-        graphics.fill(
+        context.fill(
                 navigationLeft,
                 navigationTop,
                 navigationRight,
@@ -77,13 +76,12 @@ public final class ConfigScreenRenderer {
                 0xFF191C21
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Categories"),
                 navigationLeft + 10,
                 navigationTop + 10,
-                0xFFE6E8EB,
-                false
+                0xFFE6E8EB
         );
 
         int rowTop = navigationTop + 32;
@@ -104,7 +102,7 @@ public final class ConfigScreenRenderer {
     }
 
     private void drawCategoryRow(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             VellumConfigEditor editor,
             CategoryNode category,
             int rowTop,
@@ -115,7 +113,7 @@ public final class ConfigScreenRenderer {
                 editor.selectedCategory() == category;
 
         if (selected) {
-            graphics.fill(
+            context.fill(
                     navigationLeft + 4,
                     rowTop - 3,
                     navigationRight - 4,
@@ -134,8 +132,8 @@ public final class ConfigScreenRenderer {
                 : "▸ "
                 : "  ";
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal(
                         indicator + category.title()
                 ),
@@ -143,20 +141,19 @@ public final class ConfigScreenRenderer {
                 rowTop,
                 selected
                         ? 0xFFFFFFFF
-                        : 0xFFD0D4DA,
-                false
+                        : 0xFFD0D4DA
         );
     }
 
     public void drawContentPanelHeader(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             VellumConfigEditor editor,
             int contentLeft,
             int contentTop,
             int contentRight,
             int contentBottom
     ) {
-        graphics.fill(
+        context.fill(
                 contentLeft,
                 contentTop,
                 contentRight,
@@ -171,17 +168,16 @@ public final class ConfigScreenRenderer {
                         editor.selectedCategory().title()
                 );
 
-        graphics.text(
-                font,
+        context.text(
+
                 selectedTitle,
                 contentLeft + 12,
                 contentTop + 12,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
     public void drawSaveButton(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             VellumConfigEditor editor,
             int contentRight,
             int contentBottom
@@ -196,7 +192,7 @@ public final class ConfigScreenRenderer {
                         - SAVE_BUTTON_HEIGHT
                         - 12;
 
-        graphics.fill(
+        context.fill(
                 left,
                 top,
                 left + SAVE_BUTTON_WIDTH,
@@ -206,18 +202,17 @@ public final class ConfigScreenRenderer {
                         : 0xFF454A52
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Save"),
                 left + 16,
                 top + 6,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawOptionMenu(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             OptionMenu optionMenu,
             int contentRight,
             int contentTop
@@ -230,7 +225,7 @@ public final class ConfigScreenRenderer {
         int left = contentRight - 150;
         int top = contentTop + 72;
 
-        graphics.fill(
+        context.fill(
                 left,
                 top,
                 left + 130,
@@ -238,27 +233,25 @@ public final class ConfigScreenRenderer {
                 0xFF30343B
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Reset"),
                 left + 10,
                 top + 8,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Close"),
                 left + 10,
                 top + 28,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawCloseWarning(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             VellumConfigEditor editor,
             int width,
             int height
@@ -270,7 +263,7 @@ public final class ConfigScreenRenderer {
         int left = width / 2 - 140;
         int top = height / 2 - 55;
 
-        graphics.fill(
+        context.fill(
                 0,
                 0,
                 width,
@@ -278,7 +271,7 @@ public final class ConfigScreenRenderer {
                 0x99000000
         );
 
-        graphics.fill(
+        context.fill(
                 left,
                 top,
                 left + 280,
@@ -286,52 +279,48 @@ public final class ConfigScreenRenderer {
                 0xFF30343B
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Unsaved changes"),
                 left + 20,
                 top + 16,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Save and close"),
                 left + 20,
                 top + 42,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Discard"),
                 left + 20,
                 top + 62,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Cancel"),
                 left + 20,
                 top + 82,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawOptionRowHeader(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             ConfigOptionHandle<?> option,
             int contentLeft,
             int contentRight,
             int rowTop,
             int optionRowHeight
     ) {
-        graphics.fill(
+        context.fill(
                 contentLeft + 8,
                 rowTop - 4,
                 contentRight - 8,
@@ -339,17 +328,16 @@ public final class ConfigScreenRenderer {
                 0xFF22262D
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal(option.name()),
                 contentLeft + 18,
                 rowTop + 2,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
         if (!option.description().isBlank()) {
-            graphics.text(
+            context.text(
                     font,
                     Component.literal(option.description()),
                     contentLeft + 18,
@@ -361,7 +349,7 @@ public final class ConfigScreenRenderer {
     }
 
     public void drawMoreButton(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             int contentRight,
             int rowTop,
             int optionControlHeight
@@ -369,7 +357,7 @@ public final class ConfigScreenRenderer {
         int left = contentRight - 84;
         int top = rowTop + 3;
 
-        graphics.fill(
+        context.fill(
                 left,
                 top,
                 left + 52,
@@ -377,18 +365,17 @@ public final class ConfigScreenRenderer {
                 0xFF454A52
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("More"),
                 left + 8,
                 top + 6,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawBooleanControl(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             boolean enabled,
             int contentRight,
             int rowTop,
@@ -401,7 +388,7 @@ public final class ConfigScreenRenderer {
 
         int top = rowTop + 3;
 
-        graphics.fill(
+        context.fill(
                 left,
                 top,
                 left + optionControlWidth,
@@ -411,8 +398,8 @@ public final class ConfigScreenRenderer {
                         : 0xFF454A52
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal(
                         enabled
                                 ? "ON"
@@ -420,13 +407,12 @@ public final class ConfigScreenRenderer {
                 ),
                 left + 13,
                 top + 6,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawNumericControl(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             Object value,
             int contentRight,
             int rowTop,
@@ -436,7 +422,7 @@ public final class ConfigScreenRenderer {
         int plusLeft = contentRight - 38;
         int minusLeft = plusLeft - 24;
 
-        graphics.fill(
+        context.fill(
                 minusLeft,
                 top,
                 minusLeft + 20,
@@ -444,25 +430,23 @@ public final class ConfigScreenRenderer {
                 0xFF454A52
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("-"),
                 minusLeft + 7,
                 top + 5,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal(String.valueOf(value)),
                 minusLeft - 42,
                 top + 5,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.fill(
+        context.fill(
                 plusLeft,
                 top,
                 plusLeft + 20,
@@ -470,18 +454,17 @@ public final class ConfigScreenRenderer {
                 0xFF3E7A52
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("+"),
                 plusLeft + 7,
                 top + 5,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawStringControl(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             String value,
             int contentRight,
             int rowTop,
@@ -490,7 +473,7 @@ public final class ConfigScreenRenderer {
         int left = contentRight - 210;
         int top = rowTop + 3;
 
-        graphics.fill(
+        context.fill(
                 left,
                 top,
                 contentRight - 18,
@@ -498,18 +481,17 @@ public final class ConfigScreenRenderer {
                 0xFF2A2E35
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal(value),
                 left + 8,
                 top + 5,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     public void drawListControls(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             List<String> values,
             int selectedIndex,
             boolean selectedOption,
@@ -544,7 +526,7 @@ public final class ConfigScreenRenderer {
     }
 
     private void drawListItem(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             String value,
             int index,
             boolean selected,
@@ -556,7 +538,7 @@ public final class ConfigScreenRenderer {
         int itemTop =
                 listTop + index * listRowHeight;
 
-        graphics.fill(
+        context.fill(
                 contentLeft + 18,
                 itemTop,
                 contentRight - 150,
@@ -566,18 +548,17 @@ public final class ConfigScreenRenderer {
                         : 0xFF2A2E35
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal(value),
                 contentLeft + 26,
                 itemTop + 4,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 
     private void drawListButtons(
-            GuiGraphicsExtractor graphics,
+            VellumRenderContext context,
             int contentRight,
             int rowTop,
             int optionControlHeight
@@ -586,7 +567,7 @@ public final class ConfigScreenRenderer {
         int removeLeft = contentRight - 72;
         int addLeft = removeLeft - 60;
 
-        graphics.fill(
+        context.fill(
                 addLeft,
                 buttonTop,
                 addLeft + 52,
@@ -594,16 +575,15 @@ public final class ConfigScreenRenderer {
                 0xFF3E7A52
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Add"),
                 addLeft + 13,
                 buttonTop + 6,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
 
-        graphics.fill(
+        context.fill(
                 removeLeft,
                 buttonTop,
                 removeLeft + 64,
@@ -611,13 +591,12 @@ public final class ConfigScreenRenderer {
                 0xFF8A4141
         );
 
-        graphics.text(
-                font,
+        context.text(
+
                 Component.literal("Remove"),
                 removeLeft + 7,
                 buttonTop + 6,
-                0xFFFFFFFF,
-                false
+                0xFFFFFFFF
         );
     }
 }
