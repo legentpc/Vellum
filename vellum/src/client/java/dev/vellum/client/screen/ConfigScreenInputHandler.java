@@ -1,6 +1,7 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
+import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.navigation.CategoryNode;
 import dev.vellum.client.screen.ConfigScreenState;
 
@@ -235,5 +236,41 @@ public final class ConfigScreenInputHandler {
         }
 
         return false;
+    }
+
+    public boolean isInsideNavigation(
+            VellumMousePosition mouse,
+            int navigationLeft,
+            int navigationTop,
+            int navigationRight,
+            int navigationBottom
+    ) {
+        return isInsideNavigation(
+                mouse.x(),
+                mouse.y(),
+                navigationLeft,
+                navigationTop,
+                navigationRight,
+                navigationBottom
+        );
+    }
+
+    public int listItemIndex(
+            VellumMousePosition mouse,
+            int contentLeft,
+            int contentRight,
+            int listTop,
+            int listRowHeight,
+            int itemCount
+    ) {
+        return listItemIndex(
+                mouse.x(),
+                mouse.y(),
+                contentLeft,
+                contentRight,
+                listTop,
+                listRowHeight,
+                itemCount
+        );
     }
 }

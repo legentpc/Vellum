@@ -1,6 +1,7 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
+import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.render.MinecraftRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
 import dev.vellum.client.widget.NumericOption;
@@ -397,8 +398,14 @@ public final class ConfigScreen
             MouseButtonEvent click,
             boolean doubled
     ) {
-        double mouseX = click.x();
-        double mouseY = click.y();
+        VellumMousePosition mouse =
+                new VellumMousePosition(
+                        click.x(),
+                        click.y()
+                );
+
+        double mouseX = mouse.x();
+        double mouseY = mouse.y();
 
         if (click.button() != 0) {
             return super.mouseClicked(click, doubled);
@@ -536,8 +543,7 @@ public final class ConfigScreen
 
                     int index =
                             inputHandler.listItemIndex(
-                                    mouseX,
-                                    mouseY,
+                                    mouse,
                                     contentLeft,
                                     contentRight,
                                     listTop,
@@ -1105,8 +1111,7 @@ public final class ConfigScreen
 
         int index =
                 inputHandler.listItemIndex(
-                        mouseX,
-                        mouseY,
+                        mouse,
                         contentLeft,
                         contentRight,
                         listTop,
