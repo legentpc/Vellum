@@ -40,7 +40,6 @@ public final class ConfigScreen
     private static final int SAVE_BUTTON_HEIGHT = 20;
 
     private final VellumConfigEditor editor;
-    private final ConfigManager<?> configManager;
     private final ConfigScreenInputHandler inputHandler;
 
     private static final Logger LOGGER =
@@ -67,13 +66,17 @@ public final class ConfigScreen
     ) {
         super(Component.literal("Vellum Configuration"));
 
-        this.editor = Objects.requireNonNull(
-                editor,
-                "editor"
-        );
+        ConfigManager<?> checkedConfigManager =
+                Objects.requireNonNull(
+                        configManager,
+                        "configManager"
+                );
 
-        this.configManager =
-                editor.configManager();
+        this.editor =
+                new VellumConfigEditor(
+                        checkedState,
+                        checkedConfigManager
+                );
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
