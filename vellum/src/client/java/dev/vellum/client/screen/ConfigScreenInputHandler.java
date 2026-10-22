@@ -4,7 +4,6 @@ import dev.vellum.client.input.VellumMousePosition;
 
 import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.navigation.CategoryNode;
-import dev.vellum.client.screen.ConfigScreenState;
 
 public final class ConfigScreenInputHandler {
     public boolean isInsideNavigation(
@@ -185,10 +184,7 @@ public final class ConfigScreenInputHandler {
             int categoryIndent
     ) {
         if (!isInsideNavigation(
-                new VellumMousePosition(
-                        mouseX,
-                        mouseY
-                ),
+                mouse,
                 navigationLeft,
                 navigationTop,
                 navigationRight,

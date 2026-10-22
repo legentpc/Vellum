@@ -405,7 +405,7 @@ public final class ConfigScreen
             return super.mouseClicked(click, doubled);
         }
 
-        inputHandler.handleNavigationClick(
+        if (inputHandler.handleNavigationClick(
                 new VellumMousePosition(
                         mouseX,
                         mouseY
