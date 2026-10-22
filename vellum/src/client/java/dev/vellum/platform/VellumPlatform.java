@@ -1,12 +1,13 @@
 package dev.vellum.platform;
 
 import dev.vellum.platform.api.VellumLogger;
+import dev.vellum.platform.api.VellumResourceProvider;
+import dev.vellum.platform.client.MinecraftResourceProvider;
 import dev.vellum.platform.client.Slf4jVellumLogger;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.Font;
-import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +23,8 @@ public final class VellumPlatform {
     public static Minecraft minecraft() {
         return Minecraft.getInstance();
     }
+
+    private static VellumResourceProvider resources;
 
     public static void openScreen(
             Screen screen
@@ -60,22 +63,24 @@ public final class VellumPlatform {
     }
 
     public static InputStream openResource(
-            Identifier identifier
+            String namespace,
+            String path
     ) throws IOException {
-        Objects.requireNonNull(
-                identifier,
-                "identifier"
-        );
+        return resources()
+                .open(
+                        namespace,
+                        path
+                );
+    }
 
-        return minecraft()
-                .getResourceManager()
-                .getResource(identifier)
-                .orElseThrow(
-                        () -> new IOException(
-                                "Resource not found: "
-                                        + identifier
-                        )
-                )
-                .open();
+    public static VellumResourceProvider resources() {
+        if (resources == null) {
+            resources =
+                    new MinecraftResourceProvider(
+                            minecraft()
+                    );
+        }
+
+        return resources;
     }
 }
