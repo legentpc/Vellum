@@ -5,7 +5,6 @@ import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
 import dev.vellum.client.widget.StringOption;
-import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.components.EditBox;
@@ -66,17 +65,10 @@ public final class ConfigScreen
     ) {
         super(Component.literal("Vellum Configuration"));
 
-        ConfigManager<?> checkedConfigManager =
-                Objects.requireNonNull(
-                        configManager,
-                        "configManager"
-                );
-
-        this.editor =
-                new VellumConfigEditor(
-                        checkedState,
-                        checkedConfigManager
-                );
+        this.editor = Objects.requireNonNull(
+                editor,
+                "editor"
+        );
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
