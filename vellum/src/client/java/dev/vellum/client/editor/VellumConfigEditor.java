@@ -33,6 +33,14 @@ public final class VellumConfigEditor {
         this.gson = new Gson();
     }
 
+    public void close() {
+        state.endListDrag();
+        state.clearListSelection();
+        state.endStringEdit();
+        state.closeListInput();
+        state.closeCloseWarning();
+    }
+
     public static VellumConfigEditor create(
             ConfigManager<?> configManager
     ) {

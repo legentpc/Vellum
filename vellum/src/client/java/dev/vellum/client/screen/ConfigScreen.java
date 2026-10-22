@@ -1167,4 +1167,9 @@ public final class ConfigScreen
 
         return true;
     }
+
+    @Override
+    protected void afterScreenClose() {
+        editor.close();
+    }
 }
