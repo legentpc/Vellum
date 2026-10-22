@@ -4,9 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import dev.vellum.client.editor.VellumConfigEditor;
-import dev.vellum.client.navigation.CategoryTree;
 import dev.vellum.client.screen.ConfigScreen;
-import dev.vellum.client.screen.ConfigScreenState;
 import dev.vellum.config.ConfigManager;
 import dev.vellum.platform.VellumPlatform;
 
@@ -84,18 +82,13 @@ public final class VellumTestClient
     }
 
     private void openConfigScreen() {
-        public static VellumConfigEditor create(
-                ConfigManager<?> configManager
-        ) {
-            CategoryTree tree =
-                    CategoryTree.fromConfigManager(
-                            configManager
-                    );
+        VellumConfigEditor editor =
+                VellumConfigEditor.create(
+                        configManager
+                );
 
-            return new VellumConfigEditor(
-                    new ConfigScreenState(tree),
-                    configManager
-            );
-        }
+        VellumPlatform.openScreen(
+                new ConfigScreen(editor)
+        );
     }
 }
