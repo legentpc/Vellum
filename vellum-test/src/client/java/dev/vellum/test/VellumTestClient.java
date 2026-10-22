@@ -12,7 +12,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
-import dev.vellum.platform.VellumPlatform;
+import dev.vellum.test.platform.VellumPlatform;
 
 import org.slf4j.Logger;
 

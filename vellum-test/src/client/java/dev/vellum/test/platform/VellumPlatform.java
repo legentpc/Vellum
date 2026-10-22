@@ -1,4 +1,4 @@
-package dev.vellum.platform;
+package dev.vellum.test.platform;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
