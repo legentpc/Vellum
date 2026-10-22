@@ -2,12 +2,16 @@ package dev.vellum.platform;
 
 import dev.vellum.platform.api.VellumLogger;
 import dev.vellum.platform.api.VellumResourceProvider;
+import dev.vellum.platform.api.VellumTextureProvider;
+import dev.vellum.platform.api.VellumTextureReference;
 import dev.vellum.platform.client.MinecraftResourceProvider;
+import dev.vellum.platform.client.MinecraftTextureProvider;
 import dev.vellum.platform.client.Slf4jVellumLogger;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.Font;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,11 +24,15 @@ public final class VellumPlatform {
     private VellumPlatform() {
     }
 
+    private static VellumTextureProvider<Identifier>
+            textureProvider;
+
     public static Minecraft minecraft() {
         return Minecraft.getInstance();
     }
 
     private static VellumResourceProvider resources;
+
 
     public static void openScreen(
             Screen screen
@@ -91,6 +99,28 @@ public final class VellumPlatform {
         return resources().exists(
                 namespace,
                 path
+        );
+    }
+
+    public static VellumTextureProvider<Identifier>
+    textureProvider() {
+        if (textureProvider == null) {
+            textureProvider =
+                    new MinecraftTextureProvider();
+        }
+
+        return textureProvider;
+    }
+
+    public static Identifier texture(
+            String namespace,
+            String path
+    ) {
+        return textureProvider().resolve(
+                new VellumTextureReference(
+                        namespace,
+                        path
+                )
         );
     }
 }
