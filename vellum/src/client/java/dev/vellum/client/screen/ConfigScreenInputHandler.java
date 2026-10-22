@@ -185,8 +185,10 @@ public final class ConfigScreenInputHandler {
             int categoryIndent
     ) {
         if (!isInsideNavigation(
-                mouse.x(),
-                mouse.y(),
+                new VellumMousePosition(
+                        mouseX,
+                        mouseY
+                ),
                 navigationLeft,
                 navigationTop,
                 navigationRight,

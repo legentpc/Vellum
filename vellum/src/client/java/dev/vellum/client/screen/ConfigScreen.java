@@ -405,9 +405,11 @@ public final class ConfigScreen
             return super.mouseClicked(click, doubled);
         }
 
-        if (inputHandler.handleNavigationClick(
-                mouseX,
-                mouseY,
+        inputHandler.handleNavigationClick(
+                new VellumMousePosition(
+                        mouseX,
+                        mouseY
+                ),
                 editor,
                 navigationLeft,
                 navigationTop,
@@ -535,8 +537,10 @@ public final class ConfigScreen
 
                     int index =
                             inputHandler.listItemIndex(
-                                    mouseX,
-                                    mouseY,
+                                    new VellumMousePosition(
+                                            mouseX,
+                                            mouseY
+                                    ),
                                     contentLeft,
                                     contentRight,
                                     listTop,
@@ -1099,8 +1103,10 @@ public final class ConfigScreen
 
         int index =
                 inputHandler.listItemIndex(
-                        mouseX,
-                        mouseY,
+                        new VellumMousePosition(
+                                mouseX,
+                                mouseY
+                        ),
                         contentLeft,
                         contentRight,
                         listTop,
