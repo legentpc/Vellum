@@ -1,5 +1,8 @@
 package dev.vellum.platform;
 
+import dev.vellum.platform.api.VellumLogger;
+import dev.vellum.platform.client.Slf4jVellumLogger;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.Font;
@@ -51,6 +54,10 @@ public final class VellumPlatform {
         return LoggerFactory.getLogger(name);
     }
 
+    public static Font font() {
+        return minecraft().font;
+    }
+
     public static InputStream openResource(
             Identifier identifier
     ) throws IOException {
@@ -71,7 +78,11 @@ public final class VellumPlatform {
                 .open();
     }
 
-    public static Font font() {
-        return minecraft().font;
+    public static VellumLogger logger(
+            String name
+    ) {
+        return new Slf4jVellumLogger(
+                LoggerFactory.getLogger(name)
+        );
     }
 }
