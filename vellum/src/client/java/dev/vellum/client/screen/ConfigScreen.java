@@ -3,6 +3,7 @@ package dev.vellum.client.screen;
 import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.layout.VellumEditorLayout;
+import dev.vellum.client.focus.VellumFocusManager;
 import dev.vellum.client.render.MinecraftRenderContext;
 import dev.vellum.client.render.VellumEditorRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
@@ -43,6 +44,7 @@ public final class ConfigScreen
 
     private final VellumConfigEditor editor;
     private final ConfigScreenInputHandler inputHandler;
+    private final VellumFocusManager focusManager;
 
     private static final VellumLogger LOGGER =
             VellumPlatform.logger(
@@ -74,6 +76,9 @@ public final class ConfigScreen
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
+
+        this.focusManager =
+                new VellumFocusManager();
 
         this.layout =
                 new VellumEditorLayout();
@@ -212,6 +217,9 @@ public final class ConfigScreen
         }
 
         int optionTop = layout.optionTop();
+        focusManager.setOptionCount(
+                editor.selectedCategory().options().size()
+        );
 
         for (var option : editor.selectedCategory().options()) {
             drawOptionRow(
@@ -596,6 +604,22 @@ public final class ConfigScreen
             KeyEvent event
     ) {
         int keyCode = event.key();
+
+        if (keyCode == 264) {
+            focusManager.focusNext();
+            return true;
+        }
+
+        if (keyCode == 265) {
+            focusManager.focusPrevious();
+            return true;
+        }
+
+        if (keyCode == 256 && editor.editingStringOption() == null
+                && !editor.listInputOpen()) {
+            onClose();
+            return true;
+        }
 
         if (editor.editingStringOption() != null) {
             if (keyCode == 257) {
