@@ -199,8 +199,7 @@ public final class ConfigScreen
     }
 
     private boolean handleOptionMenuClick(
-            double mouseX,
-            double mouseY
+            VellumMousePosition mouse
     ) {
         if (optionMenu == null
                 || !optionMenu.open()) {
@@ -210,15 +209,15 @@ public final class ConfigScreen
         int left = contentRight - 150;
         int top = contentTop + 72;
 
-        if (mouseX < left
-                || mouseX >= left + 130
-                || mouseY < top
-                || mouseY >= top + 48) {
+        if (mouse.x() < left
+                || mouse.x() >= left + 130
+                || mouse.y() < top
+                || mouse.y() >= top + 48) {
             optionMenu.hide();
             return true;
         }
 
-        if (mouseY < top + 24) {
+        if (mouse.y() < top + 24) {
             editor.reset(
                     optionMenu.option()
             );
@@ -290,8 +289,7 @@ public final class ConfigScreen
     }
 
     private boolean handleCloseWarningClick(
-            double mouseX,
-            double mouseY
+            VellumMousePosition mouse
     ) {
         if (!editor.closeWarningOpen()) {
             return false;
@@ -300,31 +298,31 @@ public final class ConfigScreen
         int left = width / 2 - 140;
         int top = height / 2 - 55;
 
-        if (mouseX < left
-                || mouseX >= left + 280
-                || mouseY < top
-                || mouseY >= top + 110) {
+        if (mouse.x() < left
+                || mouse.x() >= left + 280
+                || mouse.y() < top
+                || mouse.y() >= top + 110) {
             return true;
         }
 
-        if (mouseY >= top + 32
-                && mouseY < top + 56) {
+        if (mouse.y() >= top + 32
+                && mouse.y() < top + 56) {
             saveConfiguration();
             editor.closeCloseWarning();
             super.onClose();
             return true;
         }
 
-        if (mouseY >= top + 56
-                && mouseY < top + 78) {
+        if (mouse.y() >= top + 56
+                && mouse.y() < top + 78) {
             editor.markClean();
             editor.closeCloseWarning();
             super.onClose();
             return true;
         }
 
-        if (mouseY >= top + 78
-                && mouseY < top + 104) {
+        if (mouse.y() >= top + 78
+                && mouse.y() < top + 104) {
             editor.closeCloseWarning();
             return true;
         }
@@ -477,7 +475,7 @@ public final class ConfigScreen
             MouseButtonEvent click,
             boolean doubled
     ) {
-        if (handleCloseWarningClick(mouse.x(), mouse.y())) {
+        if (handleCloseWarningClick(mouse)) {
             return true;
         }
 
@@ -486,7 +484,7 @@ public final class ConfigScreen
             return true;
         }
 
-        if (handleOptionMenuClick(mouse.x(), mouse.y())) {
+        if (handleOptionMenuClick(mouse)) {
             return true;
         }
 
