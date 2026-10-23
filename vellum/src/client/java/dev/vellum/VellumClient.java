@@ -13,14 +13,10 @@ public final class VellumClient
     public void onInitializeClient() {
     }
 
-    public static void openConfigScreen(
-            ConfigManager<?> configManager
-    ) {
+    public static void openFakeConfigScreen() {
         VellumPlatform.openScreen(
                 ConfigScreen.create(
-                        VellumConfigEditor.create(
-                                configManager
-                        ),
+                        VellumConfigEditor.createForTesting(),
                         VellumPlatform.currentScreen()
                 )
         );

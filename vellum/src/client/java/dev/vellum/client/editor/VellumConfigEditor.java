@@ -5,10 +5,12 @@ import com.google.gson.Gson;
 import dev.vellum.client.navigation.CategoryNode;
 import dev.vellum.client.navigation.CategoryTree;
 import dev.vellum.client.screen.ConfigScreenState;
+import dev.vellum.client.test.VellumFakeConfig;
 import dev.vellum.config.ConfigManager;
 import dev.vellum.config.ConfigOptionHandle;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public final class VellumConfigEditor {
@@ -41,16 +43,20 @@ public final class VellumConfigEditor {
         state.closeCloseWarning();
     }
 
-    public static VellumConfigEditor create(
-            ConfigManager<?> configManager
-    ) {
-        CategoryTree tree =
-                CategoryTree.fromConfigManager(
-                        configManager
+    public static VellumConfigEditor createForTesting() {
+        VellumFakeConfig config =
+                new VellumFakeConfig();
+
+        ConfigManager<VellumFakeConfig> configManager =
+                new ConfigManager<>(
+                        config,
+                        Path.of(
+                                "build",
+                                "vellum-fake-config.json"
+                        )
                 );
 
-        return new VellumConfigEditor(
-                new ConfigScreenState(tree),
+        return create(
                 configManager
         );
     }
