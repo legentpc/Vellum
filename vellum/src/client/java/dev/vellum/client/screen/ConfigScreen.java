@@ -58,6 +58,16 @@ public final class ConfigScreen
     private ConfigScreenRenderer renderer;
     private VellumRenderContext renderContext;
 
+    public static ConfigScreen create(
+            VellumConfigEditor editor,
+            Screen previousScreen
+    ) {
+        return new ConfigScreen(
+                editor,
+                previousScreen
+        );
+    }
+
     public ConfigScreen(
             VellumConfigEditor editor,
             Screen previousScreen
