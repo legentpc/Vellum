@@ -170,35 +170,6 @@ public final class ConfigScreen
         contentBottom = bottom;
     }
 
-    private void drawBackground(GuiGraphicsExtractor graphics) {
-        graphics.fill(
-                0,
-                0,
-                width,
-                height,
-                0xFF101216
-        );
-    }
-
-    private void drawHeader(GuiGraphicsExtractor graphics) {
-        graphics.fill(
-                PANEL_MARGIN,
-                PANEL_MARGIN,
-                width - PANEL_MARGIN,
-                PANEL_MARGIN + HEADER_HEIGHT,
-                0xFF1B1E24
-        );
-
-        graphics.text(
-                font,
-                title,
-                PANEL_MARGIN + 10,
-                PANEL_MARGIN + 10,
-                0xFFFFFFFF,
-                false
-        );
-    }
-
     private boolean handleOptionMenuClick(
             double mouseX,
             double mouseY
@@ -353,7 +324,6 @@ public final class ConfigScreen
             );
         } else if (isStringListOption(option)) {
             drawListControls(
-                    graphics,
                     option,
                     rowTop
             );
@@ -440,19 +410,6 @@ public final class ConfigScreen
         }
 
         super.onClose();
-    }
-
-    private boolean isInsideNavigation(
-            double mouseX,
-            double mouseY
-    ) {
-        return inputHandler.isInsideNavigation(
-                new VellumMousePosition(mouseX, mouseY),
-                navigationLeft,
-                navigationTop,
-                navigationRight,
-                navigationBottom
-        );
     }
 
     private boolean isInsideContent(
@@ -841,7 +798,6 @@ public final class ConfigScreen
     }
 
     private void drawListControls(
-            GuiGraphicsExtractor graphics,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
@@ -864,26 +820,6 @@ public final class ConfigScreen
         );
     }
 
-    private void drawListButtons(
-            GuiGraphicsExtractor graphics,
-            int rowTop
-    ) {
-        int buttonTop = rowTop + 3;
-        int removeLeft = contentRight - 72;
-        int addLeft = removeLeft - 60;
-
-        graphics.fill(addLeft, buttonTop, addLeft + 52,
-                buttonTop + OPTION_CONTROL_HEIGHT, 0xFF3E7A52);
-        graphics.text(font, Component.literal("Add"), addLeft + 13,
-                buttonTop + 6, 0xFFFFFFFF, false);
-
-        graphics.fill(removeLeft, buttonTop, removeLeft + 64,
-                buttonTop + OPTION_CONTROL_HEIGHT, 0xFF8A4141);
-        graphics.text(font, Component.literal("Remove"), removeLeft + 7,
-                buttonTop + 6, 0xFFFFFFFF, false);
-    }
-
-    @SuppressWarnings("unchecked")
     private boolean readBoolean(
             ConfigOptionHandle<?> option
     ) {
