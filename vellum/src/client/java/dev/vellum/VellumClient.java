@@ -21,4 +21,17 @@ public final class VellumClient
                 )
         );
     }
+
+    public static void openConfigScreen(
+            ConfigManager<?> configManager
+    ) {
+        VellumPlatform.openScreen(
+                ConfigScreen.create(
+                        VellumConfigEditor.create(
+                                configManager
+                        ),
+                        VellumPlatform.currentScreen()
+                )
+        );
+    }
 }
