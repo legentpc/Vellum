@@ -424,8 +424,10 @@ public final class ConfigScreen
 
         if (isInsideContent(mouseX, mouseY)) {
             return handleContentClick(
-                    mouseX,
-                    mouseY,
+                    new VellumMousePosition(
+                            mouseX,
+                            mouseY
+                    ),
                     click,
                     doubled
             );
@@ -471,21 +473,20 @@ public final class ConfigScreen
     }
 
     private boolean handleContentClick(
-            double mouseX,
-            double mouseY,
+            VellumMousePosition mouse,
             MouseButtonEvent click,
             boolean doubled
     ) {
-        if (handleCloseWarningClick(mouseX, mouseY)) {
+        if (handleCloseWarningClick(mouse.x(), mouse.y())) {
             return true;
         }
 
-        if (isInsideSaveButton(mouseX, mouseY)) {
+        if (isInsideSaveButton(mouse.x(), mouse.y())) {
             saveConfiguration();
             return true;
         }
 
-        if (handleOptionMenuClick(mouseX, mouseY)) {
+        if (handleOptionMenuClick(mouse.x(), mouse.y())) {
             return true;
         }
 
@@ -498,21 +499,21 @@ public final class ConfigScreen
         for (var option : editor.selectedCategory().options()) {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
-            if (mouseY >= rowTop && mouseY < rowBottom) {
+            if (mouse.y() >= rowTop && mouse.y() < rowBottom) {
                 if (isBooleanOption(option)
-                        && isInsideBooleanControl(mouseX, rowTop)) {
+                        && isInsideBooleanControl(mouse.x(), rowTop)) {
                     toggleBoolean(option);
                     return true;
                 }
 
                 if (isNumericOption(option)) {
                     NumericOption numeric = new NumericOption(option);
-                    if (isInsideNumericMinus(mouseX, mouseY, rowTop)) {
+                    if (isInsideNumericMinus(mouse.x(), mouse.y(), rowTop)) {
                         numeric.decrement();
                         editor.markDirty();
                         return true;
                     }
-                    if (isInsideNumericPlus(mouseX, mouseY, rowTop)) {
+                    if (isInsideNumericPlus(mouse.x(), mouse.y(), rowTop)) {
                         numeric.increment();
                         editor.markDirty();
                         return true;
@@ -520,8 +521,7 @@ public final class ConfigScreen
                 }
 
                 if (handleStringClick(
-                        mouseX,
-                        mouseY,
+                        mouse,
                         option,
                         rowTop
                 )) {
@@ -537,10 +537,7 @@ public final class ConfigScreen
 
                     int index =
                             inputHandler.listItemIndex(
-                                    new VellumMousePosition(
-                                            mouseX,
-                                            mouseY
-                                    ),
+                                    mouse,
                                     contentLeft,
                                     contentRight,
                                     listTop,
@@ -564,14 +561,14 @@ public final class ConfigScreen
                 }
 
                 if (isStringListOption(option)
-                        && isInsideAddButton(mouseX, rowTop)) {
+                        && isInsideAddButton(mouse.x(), rowTop)) {
                     addListValue(option);
                     return true;
                 }
 
                 if (isStringListOption(option)
                         && isInsideRemoveButton(
-                        mouseX,
+                        mouse.x(),
                         rowTop
                 )) {
                     removeListValue(option);
@@ -579,8 +576,8 @@ public final class ConfigScreen
                 }
 
                 if (isInsideMoreButton(
-                        mouseX,
-                        mouseY,
+                        mouse.x(),
+                        mouse.y(),
                         rowTop
                 )) {
                     optionMenu = new OptionMenu(option);
@@ -1017,10 +1014,9 @@ public final class ConfigScreen
     }
 
     private boolean handleSaveClick(
-            double mouseX,
-            double mouseY
+            VellumMousePosition mouse
     ) {
-        if (!isInsideSaveButton(mouseX, mouseY)) {
+        if (!isInsideSaveButton(mouse.x(), mouse.y())) {
             return false;
         }
 
@@ -1029,14 +1025,13 @@ public final class ConfigScreen
     }
 
     private boolean handleMoreClick(
-            double mouseX,
-            double mouseY,
+            VellumMousePosition mouse,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
         if (!isInsideMoreButton(
-                mouseX,
-                mouseY,
+                mouse.x(),
+                mouse.y(),
                 rowTop
         )) {
             return false;
@@ -1050,8 +1045,7 @@ public final class ConfigScreen
     }
 
     private boolean handleNumericClick(
-            double mouseX,
-            double mouseY,
+            VellumMousePosition mouse,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
@@ -1063,8 +1057,8 @@ public final class ConfigScreen
                 new NumericOption(option);
 
         if (isInsideNumericMinus(
-                mouseX,
-                mouseY,
+                mouse.x(),
+                mouse.y(),
                 rowTop
         )) {
             numeric.decrement();
@@ -1073,8 +1067,8 @@ public final class ConfigScreen
         }
 
         if (isInsideNumericPlus(
-                mouseX,
-                mouseY,
+                mouse.x(),
+                mouse.y(),
                 rowTop
         )) {
             numeric.increment();
@@ -1086,8 +1080,7 @@ public final class ConfigScreen
     }
 
     private boolean handleListClick(
-            double mouseX,
-            double mouseY,
+            VellumMousePosition mouse,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
@@ -1103,10 +1096,7 @@ public final class ConfigScreen
 
         int index =
                 inputHandler.listItemIndex(
-                        new VellumMousePosition(
-                                mouseX,
-                                mouseY
-                        ),
+                        mouse,
                         contentLeft,
                         contentRight,
                         listTop,
@@ -1129,7 +1119,7 @@ public final class ConfigScreen
         }
 
         if (isInsideAddButton(
-                mouseX,
+                mouse.x(),
                 rowTop
         )) {
             addListValue(option);
@@ -1137,7 +1127,7 @@ public final class ConfigScreen
         }
 
         if (isInsideRemoveButton(
-                mouseX,
+                mouse.x(),
                 rowTop
         )) {
             removeListValue(option);
@@ -1148,8 +1138,7 @@ public final class ConfigScreen
     }
 
     private boolean handleStringClick(
-            double mouseX,
-            double mouseY,
+            VellumMousePosition mouse,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
@@ -1158,8 +1147,8 @@ public final class ConfigScreen
         }
 
         if (!isInsideStringControl(
-                mouseX,
-                mouseY,
+                mouse.x(),
+                mouse.y(),
                 rowTop
         )) {
             return false;
