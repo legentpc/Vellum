@@ -8,6 +8,7 @@ import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.render.MinecraftRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
+import dev.vellum.client.widget.VellumBooleanWidget;
 import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
@@ -507,10 +508,21 @@ public final class ConfigScreen
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouse.y() >= rowTop && mouse.y() < rowBottom) {
-                if (isBooleanOption(option)
-                        && isInsideBooleanControl(mouse.x(), rowTop)) {
-                    toggleBoolean(option);
-                    return true;
+                if (isBooleanOption(option)) {
+                    VellumBooleanWidget widget =
+                            new VellumBooleanWidget(
+                                    () -> readBoolean(option),
+                                    () -> toggleBoolean(option)
+                            );
+
+                    if (widget.contains(
+                            mouse,
+                            contentRight,
+                            rowTop
+                    )) {
+                        widget.activate();
+                        return true;
+                    }
                 }
 
                 if (isNumericOption(option)) {
