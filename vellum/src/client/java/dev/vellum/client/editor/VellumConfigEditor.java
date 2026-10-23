@@ -43,6 +43,22 @@ public final class VellumConfigEditor {
         state.closeCloseWarning();
     }
 
+    public static VellumConfigEditor create(
+            ConfigManager<?> configManager
+    ) {
+        CategoryTree tree =
+                CategoryTree.fromConfigManager(
+                        configManager
+                );
+
+        return new VellumConfigEditor(
+                new ConfigScreenState(
+                        tree
+                ),
+                configManager
+        );
+    }
+
     public static VellumConfigEditor createForTesting() {
         VellumFakeConfig config =
                 new VellumFakeConfig();
