@@ -1,6 +1,7 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
+import dev.vellum.client.input.VellumCharacterEvent;
 import dev.vellum.client.input.VellumKeyEvent;
 import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
@@ -1218,6 +1219,34 @@ public final class ConfigScreen
                 );
 
         return super.keyReleased(event);
+    }
+
+    private boolean forwardCharacterInput(
+            VellumCharacterEvent event,
+            CharacterEvent minecraftEvent
+    ) {
+        if (event.codePoint() <= 0) {
+            return false;
+        }
+
+        return super.charTyped(
+                minecraftEvent
+        );
+    }
+
+    @Override
+    public boolean charTyped(
+            CharacterEvent event
+    ) {
+        VellumCharacterEvent characterEvent =
+                new VellumCharacterEvent(
+                        event.codepoint()
+                );
+
+        return forwardCharacterInput(
+                characterEvent,
+                event
+        );
     }
 
     @Override
