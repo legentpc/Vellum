@@ -1,6 +1,7 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
+import dev.vellum.client.input.VellumKeyEvent;
 import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.render.MinecraftRenderContext;
@@ -706,27 +707,35 @@ public final class ConfigScreen
     public boolean keyPressed(
             KeyEvent event
     ) {
-        int keyCode = event.key();
+        VellumKeyEvent keyEvent =
+                new VellumKeyEvent(
+                        event.key(),
+                        event.scancode(),
+                        event.modifiers(),
+                        true
+                );
+
+        int keyCode = keyEvent.key();
 
         if (editor.editingStringOption() != null) {
-            if (keyCode == 257) {
+            if (keyEvent.key() == 257) {
                 confirmStringEdit();
                 return true;
             }
 
-            if (keyCode == 256) {
+            if (keyEvent.key() == 256) {
                 cancelStringEdit();
                 return true;
             }
         }
 
         if (editor.listInputOpen()) {
-            if (keyCode == 257) {
+            if (keyEvent.key() == 257) {
                 confirmListInput();
                 return true;
             }
 
-            if (keyCode == 256) {
+            if (keyEvent.key() == 256) {
                 cancelListInput();
                 return true;
             }
@@ -1194,6 +1203,21 @@ public final class ConfigScreen
         );
 
         return true;
+    }
+
+    @Override
+    public boolean keyReleased(
+            KeyEvent event
+    ) {
+        VellumKeyEvent keyEvent =
+                new VellumKeyEvent(
+                        event.key(),
+                        event.scancode(),
+                        event.modifiers(),
+                        false
+                );
+
+        return super.keyReleased(event);
     }
 
     @Override
