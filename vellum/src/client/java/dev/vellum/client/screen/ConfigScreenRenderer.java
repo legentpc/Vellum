@@ -387,6 +387,20 @@ public final class ConfigScreenRenderer {
         );
     }
 
+    public void drawFocusBorder(
+            VellumRenderContext context,
+            int left,
+            int top,
+            int right,
+            int bottom
+    ) {
+        int color = 0xFFE0A84B;
+        context.fill(left, top, right, top + 1, color);
+        context.fill(left, bottom - 1, right, bottom, color);
+        context.fill(left, top, left + 1, bottom, color);
+        context.fill(right - 1, top, right, bottom, color);
+    }
+
     public void drawBooleanControl(
             VellumRenderContext context,
             boolean enabled,

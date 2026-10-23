@@ -221,12 +221,15 @@ public final class ConfigScreen
                 editor.selectedCategory().options().size()
         );
 
+        int optionIndex = 0;
         for (var option : editor.selectedCategory().options()) {
             drawOptionRow(
                     option,
-                    optionTop
+                    optionTop,
+                    optionIndex == focusManager.focusedIndex()
             );
 
+            optionIndex++;
             optionTop += OPTION_ROW_HEIGHT;
         }
 
@@ -293,8 +296,19 @@ public final class ConfigScreen
 
     private void drawOptionRow(
             ConfigOptionHandle<?> option,
-            int rowTop
+            int rowTop,
+            boolean focused
     ) {
+        if (focused) {
+            renderer.drawFocusBorder(
+                    renderContext,
+                    layout.contentLeft(),
+                    rowTop,
+                    layout.contentRight(),
+                    rowTop + OPTION_ROW_HEIGHT
+            );
+        }
+
         renderer.drawOptionRowHeader(
                 renderContext,
                 option,
@@ -438,11 +452,14 @@ public final class ConfigScreen
         }
 
         int rowTop = layout.optionTop();
+        int optionIndex = 0;
 
         for (var option : editor.selectedCategory().options()) {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouse.y() >= rowTop && mouse.y() < rowBottom) {
+                focusManager.focusIndex(optionIndex);
+
                 if (isBooleanOption(option)
                         && isInsideBooleanControl(mouse.x(), rowTop)) {
                     toggleBoolean(option);
@@ -489,6 +506,7 @@ public final class ConfigScreen
             }
 
             rowTop += OPTION_ROW_HEIGHT;
+            optionIndex++;
         }
 
         return super.mouseClicked(click, doubled);
@@ -599,6 +617,27 @@ public final class ConfigScreen
         listInputBox.setVisible(false);
     }
 
+    private boolean activateFocusedOption() {
+        if (!focusManager.hasFocus()
+                || editor.selectedCategory() == null) {
+            return false;
+        }
+
+        var options = editor.selectedCategory().options();
+        int index = focusManager.focusedIndex();
+        if (index < 0 || index >= options.size()) {
+            return false;
+        }
+
+        ConfigOptionHandle<?> option = options.get(index);
+        if (isBooleanOption(option)) {
+            toggleBoolean(option);
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public boolean keyPressed(
             KeyEvent event
@@ -612,6 +651,11 @@ public final class ConfigScreen
 
         if (keyCode == 265) {
             focusManager.focusPrevious();
+            return true;
+        }
+
+        if ((keyCode == 257 || keyCode == 335 || keyCode == 32)
+                && activateFocusedOption()) {
             return true;
         }
 

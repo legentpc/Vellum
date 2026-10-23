@@ -61,4 +61,11 @@ public final class VellumFocusManager {
         return focusedIndex >= 0
                 && focusedIndex < optionCount;
     }
+
+    public void focusIndex(int index) {
+        if (index >= 0
+                && index < optionCount) {
+            focusedIndex = index;
+        }
+    }
 }
