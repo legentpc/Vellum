@@ -87,7 +87,7 @@ public final class VellumTestClient
                 );
 
         VellumPlatform.openScreen(
-                new ConfigScreen(
+                ConfigScreen.create(
                         editor,
                         VellumPlatform.currentScreen()
                 )
