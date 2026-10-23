@@ -150,7 +150,7 @@ public final class ConfigScreen
                 navigationBottom
         );
 
-        drawContentPanel(graphics);
+        drawContentPanel();
     }
 
     private void updateLayout() {
@@ -235,9 +235,7 @@ public final class ConfigScreen
         return true;
     }
 
-    private void drawContentPanel(
-            GuiGraphicsExtractor graphics
-    ) {
+    private void drawContentPanel() {
         VellumEditorRenderContext editorContext =
                 new VellumEditorRenderContext(
                         renderContext,
@@ -263,7 +261,6 @@ public final class ConfigScreen
 
         for (var option : editor.selectedCategory().options()) {
             drawOptionRow(
-                    graphics,
                     option,
                     optionTop
             );
@@ -333,7 +330,6 @@ public final class ConfigScreen
     }
 
     private void drawOptionRow(
-            GuiGraphicsExtractor graphics,
             ConfigOptionHandle<?> option,
             int rowTop
     ) {
@@ -481,8 +477,7 @@ public final class ConfigScreen
             return true;
         }
 
-        if (isInsideSaveButton(mouse.x(), mouse.y())) {
-            saveConfiguration();
+        if (handleSaveClick(mouse)) {
             return true;
         }
 
@@ -506,18 +501,12 @@ public final class ConfigScreen
                     return true;
                 }
 
-                if (isNumericOption(option)) {
-                    NumericOption numeric = new NumericOption(option);
-                    if (isInsideNumericMinus(mouse.x(), mouse.y(), rowTop)) {
-                        numeric.decrement();
-                        editor.markDirty();
-                        return true;
-                    }
-                    if (isInsideNumericPlus(mouse.x(), mouse.y(), rowTop)) {
-                        numeric.increment();
-                        editor.markDirty();
-                        return true;
-                    }
+                if (handleNumericClick(
+                        mouse,
+                        option,
+                        rowTop
+                )) {
+                    return true;
                 }
 
                 if (handleStringClick(
@@ -528,60 +517,19 @@ public final class ConfigScreen
                     return true;
                 }
 
-                if (isStringListOption(option)) {
-                    StringListOption list =
-                            new StringListOption(option);
-
-                    int listTop =
-                            rowTop + LIST_ROW_TOP_OFFSET;
-
-                    int index =
-                            inputHandler.listItemIndex(
-                                    mouse,
-                                    contentLeft,
-                                    contentRight,
-                                    listTop,
-                                    LIST_ROW_HEIGHT,
-                                    list.values().size()
-                            );
-
-                    if (index >= 0) {
-                        editor.selectListItem(
-                                option,
-                                index
-                        );
-
-                        editor.beginListDrag(
-                                option,
-                                index
-                        );
-
-                        return true;
-                    }
-                }
-
-                if (isStringListOption(option)
-                        && isInsideAddButton(mouse.x(), rowTop)) {
-                    addListValue(option);
+                if (handleListClick(
+                        mouse,
+                        option,
+                        rowTop
+                )) {
                     return true;
                 }
 
-                if (isStringListOption(option)
-                        && isInsideRemoveButton(
-                        mouse.x(),
+                if (handleMoreClick(
+                        mouse,
+                        option,
                         rowTop
                 )) {
-                    removeListValue(option);
-                    return true;
-                }
-
-                if (isInsideMoreButton(
-                        mouse.x(),
-                        mouse.y(),
-                        rowTop
-                )) {
-                    optionMenu = new OptionMenu(option);
-                    optionMenu.show();
                     return true;
                 }
 
