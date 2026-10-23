@@ -951,8 +951,31 @@ public final class ConfigScreen
         editor.markDirty();
     }
     @Override
-    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
-        if (!editor.draggingListItem()) return super.mouseDragged(event, deltaX, deltaY);
+    public boolean mouseDragged(
+            MouseButtonEvent event,
+            double deltaX,
+            double deltaY
+    ) {
+        VellumMouseEvent mouseEvent =
+                new VellumMouseEvent(
+                        new VellumMousePosition(
+                                event.x(),
+                                event.y()
+                        ),
+                        event.button(),
+                        deltaX,
+                        deltaY,
+                        false
+                );
+
+        if (!editor.draggingListItem()) {
+            return super.mouseDragged(
+                    event,
+                    mouseEvent.deltaX(),
+                    mouseEvent.deltaY()
+            );
+        }
+
         return true;
     }
 
@@ -960,6 +983,18 @@ public final class ConfigScreen
     public boolean mouseReleased(
             MouseButtonEvent event
     ) {
+        VellumMouseEvent mouseEvent =
+                new VellumMouseEvent(
+                        new VellumMousePosition(
+                                event.x(),
+                                event.y()
+                        ),
+                        event.button(),
+                        0,
+                        0,
+                        false
+                );
+
         if (!editor.draggingListItem()) {
             return super.mouseReleased(event);
         }
@@ -976,7 +1011,7 @@ public final class ConfigScreen
                 if (currentOption == option) {
                     int target =
                             (int) (
-                                    (event.y()
+                                    (mouseEvent.position().y()
                                             - rowTop
                                             - LIST_ROW_TOP_OFFSET)
                                             / LIST_ROW_HEIGHT
