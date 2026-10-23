@@ -1,6 +1,7 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
+import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.render.MinecraftRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
