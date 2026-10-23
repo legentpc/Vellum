@@ -2,6 +2,7 @@ package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.input.VellumCharacterEvent;
+import dev.vellum.client.input.VellumFocusManager;
 import dev.vellum.client.input.VellumKeyEvent;
 import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
@@ -47,6 +48,7 @@ public final class ConfigScreen
     private static final int SAVE_BUTTON_HEIGHT = 20;
 
     private final VellumConfigEditor editor;
+    private final VellumFocusManager focusManager;
     private final ConfigScreenInputHandler inputHandler;
 
     private static final VellumLogger LOGGER =
@@ -87,6 +89,9 @@ public final class ConfigScreen
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
+
+        this.focusManager =
+                new VellumFocusManager();
     }
 
     @Override
@@ -668,9 +673,15 @@ public final class ConfigScreen
     ) {
         editor.openListInput(option);
 
+        focusManager.clear(this);
+
         listInputBox.setValue("");
-        listInputBox.setVisible(true);
-        setInitialFocus(listInputBox);
+        listInputBox.setVisible(false);
+
+        focusManager.focus(
+                this,
+                listInputBox
+        );
     }
 
     private void confirmListInput() {
@@ -694,12 +705,16 @@ public final class ConfigScreen
         editor.markDirty();
 
         editor.closeListInput();
+        focusManager.clear(this);
+
         listInputBox.setValue("");
         listInputBox.setVisible(false);
     }
 
     private void cancelListInput() {
         editor.closeListInput();
+
+        focusManager.clear(this);
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
@@ -864,7 +879,11 @@ public final class ConfigScreen
         listInputBox.setValue(string.value());
         listInputBox.setY(rowTop + 3);
         listInputBox.setVisible(true);
-        setInitialFocus(listInputBox);
+
+        focusManager.focus(
+                this,
+                listInputBox
+        );
     }
 
     private void confirmStringEdit() {
@@ -882,12 +901,16 @@ public final class ConfigScreen
         editor.markDirty();
         editor.endStringEdit();
 
+        focusManager.clear(this);
+
         listInputBox.setValue("");
         listInputBox.setVisible(false);
     }
 
     private void cancelStringEdit() {
         editor.endStringEdit();
+
+        focusManager.clear(this);
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
