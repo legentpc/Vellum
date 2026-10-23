@@ -2,6 +2,7 @@ package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
 import dev.vellum.client.input.VellumMousePosition;
+import dev.vellum.client.layout.VellumEditorLayout;
 import dev.vellum.client.render.MinecraftRenderContext;
 import dev.vellum.client.render.VellumEditorRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
@@ -29,9 +30,6 @@ import dev.vellum.platform.api.VellumLogger;
 
 public final class ConfigScreen
         extends VellumScreenComponent {
-    private static final int PANEL_MARGIN = 24;
-    private static final int HEADER_HEIGHT = 32;
-    private static final int NAVIGATION_WIDTH = 180;
     private static final int CATEGORY_ROW_HEIGHT = 20;
     private static final int CATEGORY_TEXT_PADDING = 8;
     private static final int CATEGORY_INDENT = 12;
@@ -51,15 +49,7 @@ public final class ConfigScreen
                     "vellumconfig-client"
             );
 
-    private int navigationLeft;
-    private int navigationTop;
-    private int navigationRight;
-    private int navigationBottom;
-
-    private int contentLeft;
-    private int contentTop;
-    private int contentRight;
-    private int contentBottom;
+    private final VellumEditorLayout layout;
 
     private EditBox listInputBox;
     private OptionMenu optionMenu;
@@ -84,6 +74,9 @@ public final class ConfigScreen
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
+
+        this.layout =
+                new VellumEditorLayout();
     }
 
     @Override
@@ -99,8 +92,8 @@ public final class ConfigScreen
 
         listInputBox = new EditBox(
                 font,
-                contentLeft + 24,
-                contentTop + 80,
+                layout.contentLeft() + 24,
+                layout.contentTop() + 80,
                 220,
                 20,
                 Component.literal("New list item")
@@ -144,30 +137,20 @@ public final class ConfigScreen
         renderer.drawNavigationPanel(
                 renderContext,
                 editor,
-                navigationLeft,
-                navigationTop,
-                navigationRight,
-                navigationBottom
+                layout.navigationLeft(),
+                layout.navigationTop(),
+                layout.navigationRight(),
+                layout.navigationBottom()
         );
 
         drawContentPanel();
     }
 
     private void updateLayout() {
-        int left = PANEL_MARGIN;
-        int top = PANEL_MARGIN + HEADER_HEIGHT;
-        int right = width - PANEL_MARGIN;
-        int bottom = height - PANEL_MARGIN;
-
-        navigationLeft = left;
-        navigationTop = top;
-        navigationRight = left + NAVIGATION_WIDTH;
-        navigationBottom = bottom;
-
-        contentLeft = navigationRight + 12;
-        contentTop = top;
-        contentRight = right;
-        contentBottom = bottom;
+        layout.update(
+                width,
+                height
+        );
     }
 
     private boolean handleOptionMenuClick(
@@ -179,8 +162,8 @@ public final class ConfigScreen
             return false;
         }
 
-        int left = contentRight - 150;
-        int top = contentTop + 72;
+        int left = layout.contentRight() - 150;
+        int top = layout.contentTop() + 72;
 
         if (mouseX < left
                 || mouseX >= left + 130
@@ -211,10 +194,10 @@ public final class ConfigScreen
                 new VellumEditorRenderContext(
                         renderContext,
                         editor,
-                        contentLeft,
-                        contentTop,
-                        contentRight,
-                        contentBottom
+                        layout.contentLeft(),
+                        layout.contentTop(),
+                        layout.contentRight(),
+                        layout.contentBottom()
                 );
 
         renderer.drawContentPanelHeader(
@@ -228,7 +211,7 @@ public final class ConfigScreen
             return;
         }
 
-        int optionTop = contentTop + 42;
+        int optionTop = layout.optionTop();
 
         for (var option : editor.selectedCategory().options()) {
             drawOptionRow(
@@ -246,8 +229,8 @@ public final class ConfigScreen
         renderer.drawOptionMenu(
                 renderContext,
                 optionMenu,
-                contentRight,
-                contentTop
+                layout.contentRight(),
+                layout.contentTop()
         );
         renderer.drawCloseWarning(
                 renderContext,
@@ -307,8 +290,8 @@ public final class ConfigScreen
         renderer.drawOptionRowHeader(
                 renderContext,
                 option,
-                contentLeft,
-                contentRight,
+                layout.contentLeft(),
+                layout.contentRight(),
                 rowTop,
                 OPTION_ROW_HEIGHT
         );
@@ -317,7 +300,7 @@ public final class ConfigScreen
             renderer.drawBooleanControl(
                     renderContext,
                     readBoolean(option),
-                    contentRight,
+                    layout.contentRight(),
                     rowTop,
                     OPTION_CONTROL_WIDTH,
                     OPTION_CONTROL_HEIGHT
@@ -334,7 +317,7 @@ public final class ConfigScreen
             renderer.drawNumericControl(
                     renderContext,
                     numeric.value(),
-                    contentRight,
+                    layout.contentRight(),
                     rowTop,
                     OPTION_CONTROL_HEIGHT
             );
@@ -345,7 +328,7 @@ public final class ConfigScreen
             renderer.drawStringControl(
                     renderContext,
                     string.value(),
-                    contentRight,
+                    layout.contentRight(),
                     rowTop,
                     OPTION_CONTROL_HEIGHT
             );
@@ -353,7 +336,7 @@ public final class ConfigScreen
 
         renderer.drawMoreButton(
                 renderContext,
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_CONTROL_HEIGHT
         );
@@ -377,10 +360,10 @@ public final class ConfigScreen
                         mouseY
                 ),
                 editor,
-                navigationLeft,
-                navigationTop,
-                navigationRight,
-                navigationBottom,
+                layout.navigationLeft(),
+                layout.navigationTop(),
+                layout.navigationRight(),
+                layout.navigationBottom(),
                 CATEGORY_ROW_HEIGHT,
                 CATEGORY_TEXT_PADDING,
                 CATEGORY_INDENT
@@ -418,10 +401,10 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideContent(
                 new VellumMousePosition(mouseX, mouseY),
-                contentLeft,
-                contentTop,
-                contentRight,
-                contentBottom
+                layout.contentLeft(),
+                layout.contentTop(),
+                layout.contentRight(),
+                layout.contentBottom()
         );
     }
 
@@ -446,7 +429,7 @@ public final class ConfigScreen
             return super.mouseClicked(click, doubled);
         }
 
-        int rowTop = contentTop + 42;
+        int rowTop = layout.optionTop();
 
         for (var option : editor.selectedCategory().options()) {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
@@ -509,8 +492,8 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideSaveButton(
                 new VellumMousePosition(mouseX, mouseY),
-                contentRight,
-                contentBottom,
+                layout.contentRight(),
+                layout.contentBottom(),
                 SAVE_BUTTON_WIDTH,
                 SAVE_BUTTON_HEIGHT
         );
@@ -523,7 +506,7 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideMoreButton(
                 new VellumMousePosition(mouseX, mouseY),
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_CONTROL_HEIGHT
         );
@@ -546,7 +529,7 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideAddButton(
                 new VellumMousePosition(mouseX, 0),
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_ROW_HEIGHT,
                 OPTION_CONTROL_HEIGHT
@@ -559,7 +542,7 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideRemoveButton(
                 new VellumMousePosition(mouseX, 0),
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_ROW_HEIGHT,
                 OPTION_CONTROL_HEIGHT
@@ -663,7 +646,7 @@ public final class ConfigScreen
             double mouseX,
             int rowTop
     ) {
-        int left = contentRight
+        int left = layout.contentRight()
                 - OPTION_CONTROL_WIDTH
                 - 18;
 
@@ -671,8 +654,8 @@ public final class ConfigScreen
 
         return mouseX >= left
                 && mouseX < left + OPTION_CONTROL_WIDTH
-                && top >= contentTop
-                && top + OPTION_CONTROL_HEIGHT <= contentBottom;
+                && top >= layout.contentTop()
+                && top + OPTION_CONTROL_HEIGHT <= layout.contentBottom();
     }
 
     private boolean isStringListOption(
@@ -715,7 +698,7 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideNumericMinus(
                 new VellumMousePosition(mouseX, mouseY),
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_CONTROL_HEIGHT
         );
@@ -728,7 +711,7 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideNumericPlus(
                 new VellumMousePosition(mouseX, mouseY),
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_CONTROL_HEIGHT
         );
@@ -741,7 +724,7 @@ public final class ConfigScreen
     ) {
         return inputHandler.isInsideStringControl(
                 new VellumMousePosition(mouseX, mouseY),
-                contentRight,
+                layout.contentRight(),
                 rowTop,
                 OPTION_CONTROL_HEIGHT
         );
@@ -811,8 +794,8 @@ public final class ConfigScreen
                         ? editor.selectedListIndex()
                         : -1,
                 editor.selectedListOption() == option,
-                contentLeft,
-                contentRight,
+                layout.contentLeft(),
+                layout.contentRight(),
                 rowTop,
                 LIST_ROW_TOP_OFFSET,
                 LIST_ROW_HEIGHT,
@@ -855,7 +838,7 @@ public final class ConfigScreen
 
         if (option != null
                 && editor.selectedCategory() != null) {
-            int rowTop = contentTop + 42;
+            int rowTop = layout.optionTop();
 
             for (var currentOption
                     : editor.selectedCategory().options()) {
@@ -981,8 +964,8 @@ public final class ConfigScreen
         int index =
                 inputHandler.listItemIndex(
                         mouse,
-                        contentLeft,
-                        contentRight,
+                        layout.contentLeft(),
+                        layout.contentRight(),
                         listTop,
                         LIST_ROW_HEIGHT,
                         list.values().size()
