@@ -1,27 +1,19 @@
 package dev.vellum.client.screen;
 
 import dev.vellum.client.editor.VellumConfigEditor;
-import dev.vellum.client.input.VellumCharacterEvent;
-import dev.vellum.client.input.VellumFocusManager;
-import dev.vellum.client.input.VellumKeyEvent;
-import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.render.MinecraftRenderContext;
+import dev.vellum.client.render.VellumEditorRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
 import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
 import dev.vellum.client.widget.StringOption;
-import dev.vellum.client.widget.VellumBooleanWidget;
-import dev.vellum.client.widget.VellumListWidget;
-import dev.vellum.client.widget.VellumNumericWidget;
-import dev.vellum.client.widget.VellumStringWidget;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -52,7 +44,6 @@ public final class ConfigScreen
     private static final int SAVE_BUTTON_HEIGHT = 20;
 
     private final VellumConfigEditor editor;
-    private final VellumFocusManager focusManager;
     private final ConfigScreenInputHandler inputHandler;
 
     private static final VellumLogger LOGGER =
@@ -93,9 +84,6 @@ public final class ConfigScreen
 
         this.inputHandler =
                 new ConfigScreenInputHandler();
-
-        this.focusManager =
-                new VellumFocusManager();
     }
 
     @Override
@@ -212,7 +200,8 @@ public final class ConfigScreen
     }
 
     private boolean handleOptionMenuClick(
-            VellumMousePosition mouse
+            double mouseX,
+            double mouseY
     ) {
         if (optionMenu == null
                 || !optionMenu.open()) {
@@ -222,15 +211,15 @@ public final class ConfigScreen
         int left = contentRight - 150;
         int top = contentTop + 72;
 
-        if (mouse.x() < left
-                || mouse.x() >= left + 130
-                || mouse.y() < top
-                || mouse.y() >= top + 48) {
+        if (mouseX < left
+                || mouseX >= left + 130
+                || mouseY < top
+                || mouseY >= top + 48) {
             optionMenu.hide();
             return true;
         }
 
-        if (mouse.y() < top + 24) {
+        if (mouseY < top + 24) {
             editor.reset(
                     optionMenu.option()
             );
@@ -249,21 +238,23 @@ public final class ConfigScreen
     private void drawContentPanel(
             GuiGraphicsExtractor graphics
     ) {
+        VellumEditorRenderContext editorContext =
+                new VellumEditorRenderContext(
+                        renderContext,
+                        editor,
+                        contentLeft,
+                        contentTop,
+                        contentRight,
+                        contentBottom
+                );
+
         renderer.drawContentPanelHeader(
-                renderContext,
-                editor,
-                contentLeft,
-                contentTop,
-                contentRight,
-                contentBottom
+                editorContext
         );
 
         if (editor.selectedCategory() == null) {
             renderer.drawSaveButton(
-                    renderContext,
-                    editor,
-                    contentRight,
-                    contentBottom
+                    editorContext
             );
             return;
         }
@@ -281,10 +272,7 @@ public final class ConfigScreen
         }
 
         renderer.drawSaveButton(
-                renderContext,
-                editor,
-                contentRight,
-                contentBottom
+                editorContext
         );
 
         renderer.drawOptionMenu(
@@ -302,7 +290,8 @@ public final class ConfigScreen
     }
 
     private boolean handleCloseWarningClick(
-            VellumMousePosition mouse
+            double mouseX,
+            double mouseY
     ) {
         if (!editor.closeWarningOpen()) {
             return false;
@@ -311,31 +300,31 @@ public final class ConfigScreen
         int left = width / 2 - 140;
         int top = height / 2 - 55;
 
-        if (mouse.x() < left
-                || mouse.x() >= left + 280
-                || mouse.y() < top
-                || mouse.y() >= top + 110) {
+        if (mouseX < left
+                || mouseX >= left + 280
+                || mouseY < top
+                || mouseY >= top + 110) {
             return true;
         }
 
-        if (mouse.y() >= top + 32
-                && mouse.y() < top + 56) {
+        if (mouseY >= top + 32
+                && mouseY < top + 56) {
             saveConfiguration();
             editor.closeCloseWarning();
             super.onClose();
             return true;
         }
 
-        if (mouse.y() >= top + 56
-                && mouse.y() < top + 78) {
+        if (mouseY >= top + 56
+                && mouseY < top + 78) {
             editor.markClean();
             editor.closeCloseWarning();
             super.onClose();
             return true;
         }
 
-        if (mouse.y() >= top + 78
-                && mouse.y() < top + 104) {
+        if (mouseY >= top + 78
+                && mouseY < top + 104) {
             editor.closeCloseWarning();
             return true;
         }
@@ -358,77 +347,41 @@ public final class ConfigScreen
         );
 
         if (isBooleanOption(option)) {
-            VellumBooleanWidget widget =
-                    new VellumBooleanWidget(
-                            () -> readBoolean(option),
-                            () -> toggleBoolean(option)
-                    );
-
-            widget.render(
+            renderer.drawBooleanControl(
                     renderContext,
+                    readBoolean(option),
                     contentRight,
-                    rowTop
+                    rowTop,
+                    OPTION_CONTROL_WIDTH,
+                    OPTION_CONTROL_HEIGHT
             );
         } else if (isStringListOption(option)) {
-            StringListOption list =
-                    new StringListOption(option);
-
-            VellumListWidget widget =
-                    new VellumListWidget(
-                            list::values,
-                            editor::selectedListIndex,
-                            index -> editor.selectListItem(
-                                    option,
-                                    index
-                            ),
-                            () -> addListValue(option),
-                            () -> removeListValue(option)
-                    );
-
-            widget.render(
-                    renderContext,
-                    contentRight,
+            drawListControls(
+                    graphics,
+                    option,
                     rowTop
             );
         } else if (isNumericOption(option)) {
             NumericOption numeric =
                     new NumericOption(option);
 
-            VellumNumericWidget widget =
-                    new VellumNumericWidget(
-                            numeric::value,
-                            () -> {
-                                numeric.decrement();
-                                editor.markDirty();
-                            },
-                            () -> {
-                                numeric.increment();
-                                editor.markDirty();
-                            }
-                    );
-
-            widget.render(
+            renderer.drawNumericControl(
                     renderContext,
+                    numeric.value(),
                     contentRight,
-                    rowTop
+                    rowTop,
+                    OPTION_CONTROL_HEIGHT
             );
         } else if (isStringOption(option)) {
             StringOption string =
                     new StringOption(option);
 
-            VellumStringWidget widget =
-                    new VellumStringWidget(
-                            string::value,
-                            () -> beginStringEdit(
-                                    option,
-                                    rowTop
-                            )
-                    );
-
-            widget.render(
+            renderer.drawStringControl(
                     renderContext,
+                    string.value(),
                     contentRight,
-                    rowTop
+                    rowTop,
+                    OPTION_CONTROL_HEIGHT
             );
         }
 
@@ -524,7 +477,7 @@ public final class ConfigScreen
             MouseButtonEvent click,
             boolean doubled
     ) {
-        if (handleCloseWarningClick(mouse)) {
+        if (handleCloseWarningClick(mouse.x(), mouse.y())) {
             return true;
         }
 
@@ -533,7 +486,7 @@ public final class ConfigScreen
             return true;
         }
 
-        if (handleOptionMenuClick(mouse)) {
+        if (handleOptionMenuClick(mouse.x(), mouse.y())) {
             return true;
         }
 
@@ -547,21 +500,10 @@ public final class ConfigScreen
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouse.y() >= rowTop && mouse.y() < rowBottom) {
-                if (isBooleanOption(option)) {
-                    VellumBooleanWidget widget =
-                            new VellumBooleanWidget(
-                                    () -> readBoolean(option),
-                                    () -> toggleBoolean(option)
-                            );
-
-                    if (widget.contains(
-                            mouse,
-                            contentRight,
-                            rowTop
-                    )) {
-                        widget.activate();
-                        return true;
-                    }
+                if (isBooleanOption(option)
+                        && isInsideBooleanControl(mouse.x(), rowTop)) {
+                    toggleBoolean(option);
+                    return true;
                 }
 
                 if (isNumericOption(option)) {
@@ -724,15 +666,9 @@ public final class ConfigScreen
     ) {
         editor.openListInput(option);
 
-        focusManager.clear(this);
-
         listInputBox.setValue("");
-        listInputBox.setVisible(false);
-
-        focusManager.focus(
-                this,
-                listInputBox
-        );
+        listInputBox.setVisible(true);
+        setInitialFocus(listInputBox);
     }
 
     private void confirmListInput() {
@@ -756,16 +692,12 @@ public final class ConfigScreen
         editor.markDirty();
 
         editor.closeListInput();
-        focusManager.clear(this);
-
         listInputBox.setValue("");
         listInputBox.setVisible(false);
     }
 
     private void cancelListInput() {
         editor.closeListInput();
-
-        focusManager.clear(this);
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
@@ -775,35 +707,27 @@ public final class ConfigScreen
     public boolean keyPressed(
             KeyEvent event
     ) {
-        VellumKeyEvent keyEvent =
-                new VellumKeyEvent(
-                        event.key(),
-                        event.scancode(),
-                        event.modifiers(),
-                        true
-                );
-
-        int keyCode = keyEvent.key();
+        int keyCode = event.key();
 
         if (editor.editingStringOption() != null) {
-            if (keyEvent.key() == 257) {
+            if (keyCode == 257) {
                 confirmStringEdit();
                 return true;
             }
 
-            if (keyEvent.key() == 256) {
+            if (keyCode == 256) {
                 cancelStringEdit();
                 return true;
             }
         }
 
         if (editor.listInputOpen()) {
-            if (keyEvent.key() == 257) {
+            if (keyCode == 257) {
                 confirmListInput();
                 return true;
             }
 
-            if (keyEvent.key() == 256) {
+            if (keyCode == 256) {
                 cancelListInput();
                 return true;
             }
@@ -930,11 +854,7 @@ public final class ConfigScreen
         listInputBox.setValue(string.value());
         listInputBox.setY(rowTop + 3);
         listInputBox.setVisible(true);
-
-        focusManager.focus(
-                this,
-                listInputBox
-        );
+        setInitialFocus(listInputBox);
     }
 
     private void confirmStringEdit() {
@@ -952,16 +872,12 @@ public final class ConfigScreen
         editor.markDirty();
         editor.endStringEdit();
 
-        focusManager.clear(this);
-
         listInputBox.setValue("");
         listInputBox.setVisible(false);
     }
 
     private void cancelStringEdit() {
         editor.endStringEdit();
-
-        focusManager.clear(this);
 
         listInputBox.setValue("");
         listInputBox.setVisible(false);
@@ -1037,31 +953,8 @@ public final class ConfigScreen
         editor.markDirty();
     }
     @Override
-    public boolean mouseDragged(
-            MouseButtonEvent event,
-            double deltaX,
-            double deltaY
-    ) {
-        VellumMouseEvent mouseEvent =
-                new VellumMouseEvent(
-                        new VellumMousePosition(
-                                event.x(),
-                                event.y()
-                        ),
-                        event.button(),
-                        deltaX,
-                        deltaY,
-                        false
-                );
-
-        if (!editor.draggingListItem()) {
-            return super.mouseDragged(
-                    event,
-                    mouseEvent.deltaX(),
-                    mouseEvent.deltaY()
-            );
-        }
-
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (!editor.draggingListItem()) return super.mouseDragged(event, deltaX, deltaY);
         return true;
     }
 
@@ -1069,18 +962,6 @@ public final class ConfigScreen
     public boolean mouseReleased(
             MouseButtonEvent event
     ) {
-        VellumMouseEvent mouseEvent =
-                new VellumMouseEvent(
-                        new VellumMousePosition(
-                                event.x(),
-                                event.y()
-                        ),
-                        event.button(),
-                        0,
-                        0,
-                        false
-                );
-
         if (!editor.draggingListItem()) {
             return super.mouseReleased(event);
         }
@@ -1097,7 +978,7 @@ public final class ConfigScreen
                 if (currentOption == option) {
                     int target =
                             (int) (
-                                    (mouseEvent.position().y()
+                                    (event.y()
                                             - rowTop
                                             - LIST_ROW_TOP_OFFSET)
                                             / LIST_ROW_HEIGHT
@@ -1279,49 +1160,6 @@ public final class ConfigScreen
         );
 
         return true;
-    }
-
-    @Override
-    public boolean keyReleased(
-            KeyEvent event
-    ) {
-        VellumKeyEvent keyEvent =
-                new VellumKeyEvent(
-                        event.key(),
-                        event.scancode(),
-                        event.modifiers(),
-                        false
-                );
-
-        return super.keyReleased(event);
-    }
-
-    private boolean forwardCharacterInput(
-            VellumCharacterEvent event,
-            CharacterEvent minecraftEvent
-    ) {
-        if (event.codePoint() <= 0) {
-            return false;
-        }
-
-        return super.charTyped(
-                minecraftEvent
-        );
-    }
-
-    @Override
-    public boolean charTyped(
-            CharacterEvent event
-    ) {
-        VellumCharacterEvent characterEvent =
-                new VellumCharacterEvent(
-                        event.codepoint()
-                );
-
-        return forwardCharacterInput(
-                characterEvent,
-                event
-        );
     }
 
     @Override
