@@ -8,11 +8,14 @@ import dev.vellum.client.input.VellumMouseEvent;
 import dev.vellum.client.input.VellumMousePosition;
 import dev.vellum.client.render.MinecraftRenderContext;
 import dev.vellum.client.render.VellumRenderContext;
-import dev.vellum.client.widget.VellumBooleanWidget;
 import dev.vellum.client.widget.NumericOption;
 import dev.vellum.client.widget.OptionMenu;
 import dev.vellum.client.widget.StringListOption;
 import dev.vellum.client.widget.StringOption;
+import dev.vellum.client.widget.VellumBooleanWidget;
+import dev.vellum.client.widget.VellumListWidget;
+import dev.vellum.client.widget.VellumNumericWidget;
+import dev.vellum.client.widget.VellumStringWidget;
 import dev.vellum.config.ConfigOptionHandle;
 
 import net.minecraft.client.gui.components.EditBox;
@@ -355,41 +358,77 @@ public final class ConfigScreen
         );
 
         if (isBooleanOption(option)) {
-            renderer.drawBooleanControl(
+            VellumBooleanWidget widget =
+                    new VellumBooleanWidget(
+                            () -> readBoolean(option),
+                            () -> toggleBoolean(option)
+                    );
+
+            widget.render(
                     renderContext,
-                    readBoolean(option),
                     contentRight,
-                    rowTop,
-                    OPTION_CONTROL_WIDTH,
-                    OPTION_CONTROL_HEIGHT
+                    rowTop
             );
         } else if (isStringListOption(option)) {
-            drawListControls(
-                    graphics,
-                    option,
+            StringListOption list =
+                    new StringListOption(option);
+
+            VellumListWidget widget =
+                    new VellumListWidget(
+                            list::values,
+                            editor::selectedListIndex,
+                            index -> editor.selectListItem(
+                                    option,
+                                    index
+                            ),
+                            () -> addListValue(option),
+                            () -> removeListValue(option)
+                    );
+
+            widget.render(
+                    renderContext,
+                    contentRight,
                     rowTop
             );
         } else if (isNumericOption(option)) {
             NumericOption numeric =
                     new NumericOption(option);
 
-            renderer.drawNumericControl(
+            VellumNumericWidget widget =
+                    new VellumNumericWidget(
+                            numeric::value,
+                            () -> {
+                                numeric.decrement();
+                                editor.markDirty();
+                            },
+                            () -> {
+                                numeric.increment();
+                                editor.markDirty();
+                            }
+                    );
+
+            widget.render(
                     renderContext,
-                    numeric.value(),
                     contentRight,
-                    rowTop,
-                    OPTION_CONTROL_HEIGHT
+                    rowTop
             );
         } else if (isStringOption(option)) {
             StringOption string =
                     new StringOption(option);
 
-            renderer.drawStringControl(
+            VellumStringWidget widget =
+                    new VellumStringWidget(
+                            string::value,
+                            () -> beginStringEdit(
+                                    option,
+                                    rowTop
+                            )
+                    );
+
+            widget.render(
                     renderContext,
-                    string.value(),
                     contentRight,
-                    rowTop,
-                    OPTION_CONTROL_HEIGHT
+                    rowTop
             );
         }
 
