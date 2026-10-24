@@ -29,7 +29,6 @@ public final class VellumTestClient
     @Override
     public void onInitializeClient() {
         initializeConfig();
-        registerCommand();
     }
 
     private void initializeConfig() {
