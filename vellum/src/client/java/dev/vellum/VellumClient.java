@@ -11,6 +11,7 @@ import dev.vellum.platform.VellumPlatform;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.Minecraft;
 
 public final class VellumClient
         implements ClientModInitializer {
@@ -41,7 +42,10 @@ public final class VellumClient
 
         command.executes(
                 ignoredContext -> {
-                    openFakeConfigScreen();
+                    Minecraft.getInstance().schedule(
+                            VellumClient::openFakeConfigScreen
+                    );
+
                     return 1;
                 }
         );
