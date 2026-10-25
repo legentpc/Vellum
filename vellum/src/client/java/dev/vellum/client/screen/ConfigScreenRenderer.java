@@ -53,10 +53,18 @@ public final class ConfigScreenRenderer {
                 VellumTheme.PANEL_BACKGROUND
         );
 
+        context.fill(
+                PANEL_MARGIN,
+                PANEL_MARGIN + HEADER_HEIGHT - 1,
+                width - PANEL_MARGIN,
+                PANEL_MARGIN + HEADER_HEIGHT,
+                VellumTheme.BORDER
+        );
+
         context.text(
                 title,
-                PANEL_MARGIN + 10,
-                PANEL_MARGIN + 10,
+                PANEL_MARGIN + 14,
+                PANEL_MARGIN + 13,
                 VellumTheme.TEXT
         );
     }
@@ -78,11 +86,10 @@ public final class ConfigScreenRenderer {
         );
 
         context.text(
-
                 Component.literal("Categories"),
-                navigationLeft + 10,
-                navigationTop + 10,
-                VellumTheme.TEXT
+                navigationLeft + 14,
+                navigationTop + 12,
+                VellumTheme.MUTED
         );
 
         int rowTop = navigationTop + 42;
@@ -114,20 +121,37 @@ public final class ConfigScreenRenderer {
                 editor.selectedCategory() == category;
 
         if (selected) {
+            int selectedLeft =
+                    navigationLeft + 4;
+
+            int selectedRight =
+                    navigationRight - 4;
+
+            int selectedBottom =
+                    rowTop + 17;
+
             context.fill(
-                    navigationLeft + 4,
+                    selectedLeft,
                     rowTop - 3,
-                    navigationRight - 4,
-                    rowTop + 17,
+                    selectedRight,
+                    selectedBottom,
                     VellumTheme.ROW_SELECTED
             );
 
             context.fill(
-                    navigationLeft + 4,
+                    selectedLeft,
                     rowTop - 3,
-                    navigationLeft + 6,
-                    rowTop + 17,
+                    selectedLeft + 2,
+                    selectedBottom,
                     VellumTheme.ACCENT
+            );
+
+            context.fill(
+                    selectedLeft,
+                    selectedBottom - 1,
+                    selectedRight,
+                    selectedBottom,
+                    VellumTheme.BORDER
             );
         }
 
@@ -175,7 +199,15 @@ public final class ConfigScreenRenderer {
                 contentTop,
                 contentRight,
                 contentBottom,
-                VellumTheme.NAVIGATION_BACKGROUND
+                VellumTheme.PANEL_BACKGROUND
+        );
+
+        context.fill(
+                contentLeft,
+                contentTop,
+                contentRight,
+                contentTop + 1,
+                VellumTheme.BORDER
         );
 
         Component selectedTitle =
@@ -343,12 +375,29 @@ public final class ConfigScreenRenderer {
             int rowTop,
             int optionRowHeight
     ) {
+        int rowLeft =
+                contentLeft + 8;
+
+        int rowRight =
+                contentRight - 8;
+
+        int rowBottom =
+                rowTop + optionRowHeight - 4;
+
         context.fill(
-                contentLeft + 8,
+                rowLeft,
                 rowTop - 4,
-                contentRight - 8,
-                rowTop + optionRowHeight - 4,
+                rowRight,
+                rowBottom,
                 VellumTheme.ROW_BACKGROUND
+        );
+
+        context.fill(
+                rowLeft,
+                rowBottom - 1,
+                rowRight,
+                rowBottom,
+                VellumTheme.BORDER
         );
 
         context.text(
@@ -376,7 +425,7 @@ public final class ConfigScreenRenderer {
             int optionControlHeight
     ) {
         int left = contentRight - 84;
-        int top = rowTop + 3;
+        int top = rowTop + 12;
 
         context.fill(
                 left,
@@ -421,7 +470,7 @@ public final class ConfigScreenRenderer {
                 - optionControlWidth
                 - 18;
 
-        int top = rowTop + 3;
+        int top = rowTop + 12;
 
         context.fill(
                 left,
@@ -453,7 +502,7 @@ public final class ConfigScreenRenderer {
             int rowTop,
             int optionControlHeight
     ) {
-        int top = rowTop + 3;
+        int top = rowTop + 12;
         int plusLeft = contentRight - 38;
         int minusLeft = plusLeft - 24;
 
@@ -506,7 +555,7 @@ public final class ConfigScreenRenderer {
             int optionControlHeight
     ) {
         int left = contentRight - 210;
-        int top = rowTop + 3;
+        int top = rowTop + 12;
 
         context.fill(
                 left,
