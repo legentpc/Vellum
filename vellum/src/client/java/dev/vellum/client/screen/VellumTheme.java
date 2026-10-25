@@ -1,6 +1,6 @@
 package dev.vellum.client.screen;
 
-public final class VellumMoulTheme {
+public final class VellumTheme {
     public static final int SCREEN_BACKGROUND =
             0xFF101216;
 
@@ -40,6 +40,6 @@ public final class VellumMoulTheme {
     public static final int CONTROL_ACTIVE =
             0xFF4E9BE8;
 
-    private VellumMoulTheme() {
+    private VellumTheme() {
     }
 }

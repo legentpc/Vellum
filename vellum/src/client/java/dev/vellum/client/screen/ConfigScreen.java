@@ -23,7 +23,6 @@ import net.minecraft.network.chat.Component;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,17 +41,10 @@ public final class ConfigScreen
     private static final int OPTION_CONTROL_HEIGHT = 20;
     private static final int SAVE_BUTTON_WIDTH = 64;
     private static final int SAVE_BUTTON_HEIGHT = 20;
-    private static final int SEARCH_WIDTH = 180;
-    private static final int SEARCH_HEIGHT = 20;
-    private static final int SCROLL_STEP = 24;
 
     private final VellumConfigEditor editor;
     private final ConfigScreenInputHandler inputHandler;
     private final VellumFocusManager focusManager;
-
-    private int optionScroll;
-    private EditBox searchBox;
-    private String searchText = "";
 
     private static final VellumLogger LOGGER =
             VellumPlatform.logger(
@@ -121,31 +113,6 @@ public final class ConfigScreen
                 20,
                 Component.literal("New list item")
         );
-
-        searchBox = new EditBox(
-                font,
-                layout.contentLeft(),
-                layout.contentTop(),
-                SEARCH_WIDTH,
-                SEARCH_HEIGHT,
-                Component.literal(
-                        "Search options"
-                )
-        );
-
-        searchBox.setValue(
-                searchText
-        );
-
-        searchBox.setResponder(
-                value -> {
-                    searchText = value;
-                    optionScroll = 0;
-                    focusManager.clearFocus();
-                }
-        );
-
-        addRenderableWidget(searchBox);
 
         listInputBox.setVisible(false);
         addRenderableWidget(listInputBox);
@@ -259,32 +226,18 @@ public final class ConfigScreen
             return;
         }
 
-        List<ConfigOptionHandle<?>> options =
-                visibleOptions();
-
+        int optionTop = layout.optionTop();
         focusManager.setOptionCount(
-                options.size()
+                editor.selectedCategory().options().size()
         );
 
-        int optionTop =
-                layout.optionTop()
-                        - optionScroll;
-
         int optionIndex = 0;
-
-        for (var option : options) {
-            int rowBottom =
-                    optionTop + OPTION_ROW_HEIGHT;
-
-            if (rowBottom >= layout.contentTop()
-                    && optionTop <= layout.contentBottom()) {
-                drawOptionRow(
-                        option,
-                        optionTop,
-                        optionIndex
-                                == focusManager.focusedIndex()
-                );
-            }
+        for (var option : editor.selectedCategory().options()) {
+            drawOptionRow(
+                    option,
+                    optionTop,
+                    optionIndex == focusManager.focusedIndex()
+            );
 
             optionIndex++;
             optionTop += OPTION_ROW_HEIGHT;
@@ -306,74 +259,6 @@ public final class ConfigScreen
                 width,
                 height
         );
-    }
-
-    private int maxOptionScroll() {
-        int totalHeight =
-                visibleOptions().size()
-                        * OPTION_ROW_HEIGHT;
-
-        int visibleHeight =
-                layout.contentBottom()
-                        - layout.optionTop();
-
-        return Math.max(
-                0,
-                totalHeight - visibleHeight
-        );
-    }
-
-    private void setOptionScroll(int value) {
-        optionScroll =
-                Math.max(
-                        0,
-                        Math.min(
-                                value,
-                                maxOptionScroll()
-                        )
-                );
-    }
-
-    @Override
-    public boolean mouseScrolled(
-            double mouseX,
-            double mouseY,
-            double scrollX,
-            double scrollY
-    ) {
-        if (editor.selectedCategory() == null) {
-            return super.mouseScrolled(
-                    mouseX,
-                    mouseY,
-                    scrollX,
-                    scrollY
-            );
-        }
-
-        if (!inputHandler.isInsideContent(
-                new VellumMousePosition(
-                        mouseX,
-                        mouseY
-                ),
-                layout.contentLeft(),
-                layout.contentTop(),
-                layout.contentRight(),
-                layout.contentBottom()
-        )) {
-            return super.mouseScrolled(
-                    mouseX,
-                    mouseY,
-                    scrollX,
-                    scrollY
-            );
-        }
-
-        setOptionScroll(
-                optionScroll
-                        - (int) (scrollY * SCROLL_STEP)
-        );
-
-        return true;
     }
 
     private boolean handleCloseWarningClick(
@@ -576,12 +461,10 @@ public final class ConfigScreen
             return super.mouseClicked(click, doubled);
         }
 
-        int rowTop =
-                layout.optionTop()
-                        - optionScroll;
+        int rowTop = layout.optionTop();
         int optionIndex = 0;
 
-        for (var option : visibleOptions()) {
+        for (var option : editor.selectedCategory().options()) {
             int rowBottom = rowTop + OPTION_ROW_HEIGHT;
 
             if (mouse.y() >= rowTop && mouse.y() < rowBottom) {
@@ -773,7 +656,6 @@ public final class ConfigScreen
 
         if (keyCode == 264) {
             focusManager.focusNext();
-            ensureFocusedOptionVisible();
             return true;
         }
 
@@ -1034,9 +916,7 @@ public final class ConfigScreen
 
         if (option != null
                 && editor.selectedCategory() != null) {
-            int rowTop =
-                    layout.optionTop()
-                            - optionScroll;
+            int rowTop = layout.optionTop();
 
             for (var currentOption
                     : editor.selectedCategory().options()) {
@@ -1225,68 +1105,6 @@ public final class ConfigScreen
         );
 
         return true;
-    }
-
-    private List<ConfigOptionHandle<?>> visibleOptions() {
-        if (editor.selectedCategory() == null) {
-            return List.of();
-        }
-
-        String query =
-                searchText
-                        .trim()
-                        .toLowerCase();
-
-        if (query.isEmpty()) {
-            return editor.selectedCategory().options();
-        }
-
-        return editor.selectedCategory()
-                .options()
-                .stream()
-                .filter(option ->
-                        option.name()
-                                .toLowerCase()
-                                .contains(query)
-                                || option.description()
-                                .toLowerCase()
-                                .contains(query)
-                )
-                .toList();
-    }
-
-    private void ensureFocusedOptionVisible() {
-        int index =
-                focusManager.focusedIndex();
-
-        if (index < 0) {
-            return;
-        }
-
-        int rowTop =
-                layout.optionTop()
-                        + index * OPTION_ROW_HEIGHT;
-
-        int rowBottom =
-                rowTop + OPTION_ROW_HEIGHT;
-
-        int visibleTop =
-                layout.optionTop();
-
-        int visibleBottom =
-                layout.contentBottom();
-
-        if (rowTop < visibleTop) {
-            setOptionScroll(
-                    optionScroll
-                            - (visibleTop - rowTop)
-            );
-        } else if (rowBottom > visibleBottom) {
-            setOptionScroll(
-                    optionScroll
-                            + (rowBottom - visibleBottom)
-            );
-        }
     }
 
     @Override
