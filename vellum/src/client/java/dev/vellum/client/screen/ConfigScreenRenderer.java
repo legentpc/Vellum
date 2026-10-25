@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Objects;
 
 public final class ConfigScreenRenderer {
-    private static final int PANEL_MARGIN = 24;
-    private static final int HEADER_HEIGHT = 32;
+    private static final int PANEL_MARGIN = 18;
+    private static final int HEADER_HEIGHT = 42;
     private static final int SAVE_BUTTON_WIDTH = 64;
     private static final int SAVE_BUTTON_HEIGHT = 20;
 
@@ -36,7 +36,7 @@ public final class ConfigScreenRenderer {
                 0,
                 context.width(),
                 context.height(),
-                0xFF101216
+                VellumMoulTheme.SCREEN_BACKGROUND
         );
     }
 
@@ -50,14 +50,14 @@ public final class ConfigScreenRenderer {
                 PANEL_MARGIN,
                 width - PANEL_MARGIN,
                 PANEL_MARGIN + HEADER_HEIGHT,
-                0xFF1B1E24
+                VellumMoulTheme.PANEL_BACKGROUND
         );
 
         context.text(
                 title,
                 PANEL_MARGIN + 10,
                 PANEL_MARGIN + 10,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -74,7 +74,7 @@ public final class ConfigScreenRenderer {
                 navigationTop,
                 navigationRight,
                 navigationBottom,
-                0xFF191C21
+                VellumMoulTheme.NAVIGATION_BACKGROUND
         );
 
         context.text(
@@ -82,7 +82,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Categories"),
                 navigationLeft + 10,
                 navigationTop + 10,
-                0xFFE6E8EB
+                VellumMoulTheme.TEXT
         );
 
         int rowTop = navigationTop + 32;
@@ -119,7 +119,7 @@ public final class ConfigScreenRenderer {
                     rowTop - 3,
                     navigationRight - 4,
                     rowTop + 17,
-                    0xFF303640
+                    VellumMoulTheme.ROW_SELECTED
             );
         }
 
@@ -141,8 +141,8 @@ public final class ConfigScreenRenderer {
                 left,
                 rowTop,
                 selected
-                        ? 0xFFFFFFFF
-                        : 0xFFD0D4DA
+                        ? VellumMoulTheme.TEXT
+                        : VellumMoulTheme.DESCRIPTION
         );
     }
 
@@ -167,7 +167,7 @@ public final class ConfigScreenRenderer {
                 contentTop,
                 contentRight,
                 contentBottom,
-                0xFF191C21
+                VellumMoulTheme.NAVIGATION_BACKGROUND
         );
 
         Component selectedTitle =
@@ -182,7 +182,7 @@ public final class ConfigScreenRenderer {
                 selectedTitle,
                 contentLeft + 12,
                 contentTop + 12,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
     public void drawSaveButton(
@@ -213,8 +213,8 @@ public final class ConfigScreenRenderer {
                 left + SAVE_BUTTON_WIDTH,
                 top + SAVE_BUTTON_HEIGHT,
                 editor.dirty()
-                        ? 0xFF3E7A52
-                        : 0xFF454A52
+                        ? VellumMoulTheme.CONTROL_ACTIVE
+                        : VellumMoulTheme.CONTROL_BACKGROUND
         );
 
         context.text(
@@ -222,7 +222,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Save"),
                 left + 16,
                 top + 6,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -245,7 +245,7 @@ public final class ConfigScreenRenderer {
                 top,
                 left + 130,
                 top + 48,
-                0xFF30343B
+                VellumMoulTheme.ROW_HOVER
         );
 
         context.text(
@@ -253,7 +253,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Reset"),
                 left + 10,
                 top + 8,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.text(
@@ -261,7 +261,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Close"),
                 left + 10,
                 top + 28,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -291,7 +291,7 @@ public final class ConfigScreenRenderer {
                 top,
                 left + 280,
                 top + 110,
-                0xFF30343B
+                VellumMoulTheme.ROW_HOVER
         );
 
         context.text(
@@ -299,7 +299,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Unsaved changes"),
                 left + 20,
                 top + 16,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.text(
@@ -307,7 +307,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Save and close"),
                 left + 20,
                 top + 42,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.text(
@@ -315,7 +315,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Discard"),
                 left + 20,
                 top + 62,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.text(
@@ -323,7 +323,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Cancel"),
                 left + 20,
                 top + 82,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -340,7 +340,7 @@ public final class ConfigScreenRenderer {
                 rowTop - 4,
                 contentRight - 8,
                 rowTop + optionRowHeight - 4,
-                0xFF22262D
+                VellumMoulTheme.ROW_BACKGROUND
         );
 
         context.text(
@@ -348,7 +348,7 @@ public final class ConfigScreenRenderer {
                 Component.literal(option.name()),
                 contentLeft + 18,
                 rowTop + 2,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         if (!option.description().isBlank()) {
@@ -375,7 +375,7 @@ public final class ConfigScreenRenderer {
                 top,
                 left + 52,
                 top + optionControlHeight,
-                0xFF454A52
+                VellumMoulTheme.CONTROL_BACKGROUND
         );
 
         context.text(
@@ -383,7 +383,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("More"),
                 left + 8,
                 top + 6,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -394,7 +394,7 @@ public final class ConfigScreenRenderer {
             int right,
             int bottom
     ) {
-        int color = 0xFFE0A84B;
+        int color = VellumMoulTheme.ACCENT;
         context.fill(left, top, right, top + 1, color);
         context.fill(left, bottom - 1, right, bottom, color);
         context.fill(left, top, left + 1, bottom, color);
@@ -421,8 +421,8 @@ public final class ConfigScreenRenderer {
                 left + optionControlWidth,
                 top + optionControlHeight,
                 enabled
-                        ? 0xFF3E7A52
-                        : 0xFF454A52
+                        ? VellumMoulTheme.CONTROL_ACTIVE
+                        : VellumMoulTheme.CONTROL_BACKGROUND
         );
 
         context.text(
@@ -434,7 +434,7 @@ public final class ConfigScreenRenderer {
                 ),
                 left + 13,
                 top + 6,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -454,7 +454,7 @@ public final class ConfigScreenRenderer {
                 top,
                 minusLeft + 20,
                 top + optionControlHeight,
-                0xFF454A52
+                VellumMoulTheme.CONTROL_BACKGROUND
         );
 
         context.text(
@@ -462,7 +462,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("-"),
                 minusLeft + 7,
                 top + 5,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.text(
@@ -470,7 +470,7 @@ public final class ConfigScreenRenderer {
                 Component.literal(String.valueOf(value)),
                 minusLeft - 42,
                 top + 5,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.fill(
@@ -478,7 +478,7 @@ public final class ConfigScreenRenderer {
                 top,
                 plusLeft + 20,
                 top + optionControlHeight,
-                0xFF3E7A52
+                VellumMoulTheme.CONTROL_ACTIVE
         );
 
         context.text(
@@ -486,7 +486,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("+"),
                 plusLeft + 7,
                 top + 5,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -513,7 +513,7 @@ public final class ConfigScreenRenderer {
                 Component.literal(value),
                 left + 8,
                 top + 5,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -580,7 +580,7 @@ public final class ConfigScreenRenderer {
                 Component.literal(value),
                 contentLeft + 26,
                 itemTop + 4,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 
@@ -599,7 +599,7 @@ public final class ConfigScreenRenderer {
                 buttonTop,
                 addLeft + 52,
                 buttonTop + optionControlHeight,
-                0xFF3E7A52
+                VellumMoulTheme.CONTROL_ACTIVE
         );
 
         context.text(
@@ -607,7 +607,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Add"),
                 addLeft + 13,
                 buttonTop + 6,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
 
         context.fill(
@@ -615,7 +615,7 @@ public final class ConfigScreenRenderer {
                 buttonTop,
                 removeLeft + 64,
                 buttonTop + optionControlHeight,
-                0xFF8A4141
+                VellumMoulTheme.MUTED
         );
 
         context.text(
@@ -623,7 +623,7 @@ public final class ConfigScreenRenderer {
                 Component.literal("Remove"),
                 removeLeft + 7,
                 buttonTop + 6,
-                0xFFFFFFFF
+                VellumMoulTheme.TEXT
         );
     }
 }

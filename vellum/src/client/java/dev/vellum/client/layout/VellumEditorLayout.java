@@ -1,9 +1,11 @@
 package dev.vellum.client.layout;
 
 public final class VellumEditorLayout {
-    private static final int PANEL_MARGIN = 24;
-    private static final int HEADER_HEIGHT = 32;
-    private static final int NAVIGATION_WIDTH = 180;
+    private static final int OUTER_MARGIN = 18;
+    private static final int HEADER_HEIGHT = 42;
+    private static final int NAVIGATION_WIDTH = 196;
+    private static final int CONTENT_GAP = 14;
+    private static final int PANEL_PADDING = 16;
 
     private int width;
     private int height;
@@ -25,14 +27,14 @@ public final class VellumEditorLayout {
         this.width = width;
         this.height = height;
 
-        int left = PANEL_MARGIN;
+        int left = OUTER_MARGIN;
         int top =
-                PANEL_MARGIN
+                OUTER_MARGIN
                         + HEADER_HEIGHT;
         int right =
-                width - PANEL_MARGIN;
+                width - OUTER_MARGIN;
         int bottom =
-                height - PANEL_MARGIN;
+                height - OUTER_MARGIN;
 
         navigationLeft = left;
         navigationTop = top;
@@ -41,10 +43,10 @@ public final class VellumEditorLayout {
         navigationBottom = bottom;
 
         contentLeft =
-                navigationRight + 12;
-        contentTop = top;
-        contentRight = right;
-        contentBottom = bottom;
+                navigationRight + CONTENT_GAP;
+        contentTop = top + PANEL_PADDING;
+        contentRight = right - PANEL_PADDING;
+        contentBottom = bottom - PANEL_PADDING;
     }
 
     public int width() {
